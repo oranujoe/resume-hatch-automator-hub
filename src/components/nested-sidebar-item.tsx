@@ -1,6 +1,5 @@
-import React, { useState } from "react";
-import { NavLink } from "react-router-dom";
-import { ChevronDown, ChevronRight, LucideIcon } from "lucide-react";
+
+t { ChevronDown, ChevronRight, LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   Collapsible,
@@ -24,89 +23,99 @@ export function NestedSidebarItem({
   collapsed = false,
 }: NestedSidebarItemProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const hasSub = Array.isArray(subItems) && subItems.length > 0;
+  const location = useLocation();
+  
+  // Check if this item or any of its children are active
+  const isItemActive = href === location.pathname;
+  const isChildActive = hasSub && subItems!.some(item => item.href === location.pathname);
+  
+  // 1) Base layout for every row
+  const base = cn(
+    "flex items-center justify-between w-full",
+    "px-4 py-2 rounded-lg transition-colors",
+    "hover:bg-muted dark:hover:bg-slate-800"
+  );
 
-  // core shared classes
-  const base = "flex items-center w-full transition-colors";
-  const hover = "hover:bg-muted dark:hover:bg-slate-800";
+  // 2) Color toggles
+  const active   = "bg-yellow-200 text-blue-600 font-medium dark:bg-blue-900 dark:text-yellow-200";
+  const inactive = "text-muted-foreground dark:text-white";
 
-  // padding & alignment
-  const expandedLayout = "justify-start gap-3 px-4 py-2 rounded-lg";
-  const collapsedLayout = "justify-center px-0 py-2";
+  // 3) Left side icon+label
+  const Left = (
+    <div className="flex items-center gap-3">
+      <Icon className="w-5 h-5 flex-shrink-0" />
+      {!collapsed && <span className="flex-1 text-sm font-medium truncate">{label}</span>}
+    </div>
+  );
 
-  // active/inactive colors
-  const activeColor = "bg-yellow-200 text-blue-600 dark:bg-blue-900 dark:text-yellow-200";
-  const inactiveColor = "text-muted-foreground dark:text-white";
+  // 4) Right side chevron
+  const Right = !collapsed && (
+    hasSub
+      ? (isOpen
+          ? <ChevronDown className="w-4 h-4 flex-shrink-0" />
+          : <ChevronRight className="w-4 h-4 flex-shrink-0" />
+        )
+      : <ChevronRight className="w-4 h-4 flex-shrink-0" />
+  );
 
-  // render a simple NavLink when no subItems
-  if (!subItems?.length) {
+  // === Leaf ===
+  if (!hasSub) {
     return (
       <NavLink
         to={href || "#"}
-        end                              // exact match for active
         className={({ isActive }) =>
-          cn(
-            base,
-            hover,
-            collapsed ? collapsedLayout : expandedLayout,
-            isActive ? `${activeColor}` : inactiveColor,
-            // only give pill shape when active & expanded
-            !collapsed && isActive && "rounded-full"
-          )
+          cn(base, isActive ? active : inactive, collapsed && "justify-center")
         }
+        end
       >
-        <Icon className="w-5 h-5 flex-shrink-0" />
-        {!collapsed && (
-          <span className="text-sm font-medium truncate">{label}</span>
-        )}
+        {Left}
+        {Right}
       </NavLink>
     );
   }
 
-  // render collapsible trigger + nested items
+  // === Branch ===
+  // For parent items, we manually control the active state
   return (
-    <Collapsible open={isOpen && !collapsed} onOpenChange={setIsOpen} className="w-full">
+    <Collapsible 
+      open={isOpen && !collapsed} 
+      onOpenChange={setIsOpen} 
+      className="w-full"
+    >
       <CollapsibleTrigger
         className={cn(
           base,
-          hover,
-          collapsed ? collapsedLayout : expandedLayout,
-          isOpen ? "text-blue-600 font-medium dark:text-blue-400" : inactiveColor,
-          !collapsed && isOpen && "rounded-full"
+          isChildActive && !isItemActive ? inactive : (isItemActive ? active : inactive),
+          collapsed && "justify-center"
         )}
       >
-        <Icon className="w-5 h-5 flex-shrink-0" />
-        {!collapsed && (
-          <>
-            <span className="flex-1 text-sm font-medium truncate">{label}</span>
-            {isOpen ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
-          </>
-        )}
+        {Left}
+        {Right}
       </CollapsibleTrigger>
 
-      <CollapsibleContent className={cn(collapsed && "hidden")}>
-        <div className="border-l border-gray-200 dark:border-slate-700 pl-6 mt-1 flex flex-col space-y-1">
-          {subItems.map(({ icon: SubIcon, label: subLabel, href: subHref }) => (
-            <NavLink
-              key={subHref}
-              to={subHref}
-              end
-              className={({ isActive }) =>
-                cn(
-                  base,
-                  hover,
-                  // nested items always expand, so use expandedLayout
-                  `gap-3 px-4 py-2 rounded-lg pl-2`,
-                  isActive ? activeColor : inactiveColor,
-                  isActive && "rounded-full"
-                )
-              }
-            >
-              <SubIcon className="w-5 h-5 flex-shrink-0" />
-              <span className="text-sm font-medium truncate">{subLabel}</span>
-            </NavLink>
-          ))}
-        </div>
-      </CollapsibleContent>
+      {!collapsed && (
+        <CollapsibleContent>
+          <div className="ml-6 border-l border-gray-200 dark:border-slate-700 pl-4 mt-1 space-y-1">
+            {subItems!.map(({ icon: SI, label: sLabel, href: sHref }) => (
+              <NavLink
+                key={sHref}
+                to={sHref}
+                className={({ isActive }) =>
+                  cn(base, isActive ? active : inactive, "pl-2")
+                }
+                end
+              >
+                <div className="flex items-center gap-3">
+                  <SI className="w-5 h-5 flex-shrink-0" />
+                  <span className="flex-1 text-sm font-medium truncate">{sLabel}</span>
+                </div>
+                <ChevronRight className="w-4 h-4 flex-shrink-0" />
+              </NavLink>
+            ))}
+          </div>
+        </CollapsibleContent>
+      )}
     </Collapsible>
   );
 }
