@@ -2,6 +2,11 @@ import React, { useState } from "react";
 import { NavLink } from "react-router-dom";
 import { ChevronDown, ChevronRight, LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
+import {
+  Collapsible,
+  CollapsibleTrigger,
+  CollapsibleContent,
+} from "@/components/ui/collapsible";
 
 interface NestedSidebarItemProps {
   icon: LucideIcon;
@@ -18,87 +23,88 @@ export function NestedSidebarItem({
   subItems,
   collapsed = false,
 }: NestedSidebarItemProps) {
-  const [open, setOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
   const hasSub = Array.isArray(subItems) && subItems.length > 0;
 
-  // shared layout for *all* rows
-  const base = `
-    flex items-center w-full gap-3
-    px-4 py-2 rounded-lg
-    transition-colors hover:bg-muted dark:hover:bg-slate-800
-  `;
-  const activeStyles = `
-    bg-yellow-200 text-blue-600 font-medium
-    dark:bg-blue-900 dark:text-yellow-200
-  `;
-  const inactiveStyles = `text-muted-foreground dark:text-white`;
+  // 1) Base layout for every row
+  const base = cn(
+    "flex items-center justify-between w-full",
+    "px-4 py-2 rounded-lg transition-colors",
+    "hover:bg-muted dark:hover:bg-slate-800"
+  );
 
-  // choose wrapper: NavLink for leaves, button for branches
-  const Wrapper: React.ElementType = hasSub ? "button" : NavLink;
-  const wrapperProps = hasSub
-    ? { onClick: () => setOpen((o) => !o), type: "button" as const }
-    : { to: href! };
+  // 2) Color toggles
+  const active   = "bg-yellow-200 text-blue-600 font-medium dark:bg-blue-900 dark:text-yellow-200";
+  const inactive = "text-muted-foreground dark:text-white";
 
-  return (
-    <>
-      <Wrapper
-        {...wrapperProps}
-        className={({ isActive }: { isActive?: boolean }) =>
-          hasSub
-            ? cn(
-                base,
-                open ? activeStyles : inactiveStyles,
-                collapsed && "justify-center"
-              )
-            : cn(
-                base,
-                isActive ? activeStyles : inactiveStyles,
-                collapsed && "justify-center"
-              )
+  // 3) Left side icon+label
+  const Left = (
+    <div className="flex items-center gap-3">
+      <Icon className="w-5 h-5 flex-shrink-0" />
+      {!collapsed && <span className="flex-1 text-sm font-medium truncate">{label}</span>}
+    </div>
+  );
+
+  // 4) Right side chevron
+  const Right = !collapsed && (
+    hasSub
+      ? (isOpen
+          ? <ChevronDown className="w-4 h-4 flex-shrink-0" />
+          : <ChevronRight className="w-4 h-4 flex-shrink-0" />
+        )
+      : <ChevronRight className="w-4 h-4 flex-shrink-0" />
+  );
+
+  // === Leaf ===
+  if (!hasSub) {
+    return (
+      <NavLink
+        to={href || "#"}
+        className={({ isActive }) =>
+          cn(base, isActive ? active : inactive, collapsed && "justify-center")
         }
       >
-        {/* 1) icon always in a fixed 20×20 box */}
-        <div className="flex items-center justify-center w-5 h-5">
-          <Icon size={20} />
-        </div>
+        {Left}
+        {Right}
+      </NavLink>
+    );
+  }
 
-        {/* 2) label always flex-1 so it sits in the same spot */}
-        {!collapsed && (
-          <>
-            <span className="flex-1 text-sm font-medium truncate">
-              {label}
-            </span>
-            {/* 3) only branches get an arrow */}
-            {hasSub && (open ? <ChevronDown size={16} /> : <ChevronRight size={16} />)}
-          </>
+  // === Branch ===
+  return (
+    <Collapsible open={isOpen && !collapsed} onOpenChange={setIsOpen} className="w-full">
+      <CollapsibleTrigger
+        className={cn(
+          base,
+          isOpen ? active : inactive,
+          collapsed && "justify-center"
         )}
-      </Wrapper>
+      >
+        {Left}
+        {Right}
+      </CollapsibleTrigger>
 
-      {/* 4) render sub-items with the *same* base styles */}
-      {hasSub && !collapsed && open && (
-        <div className="ml-6 border-l border-gray-200 dark:border-slate-700 pl-4 mt-1 space-y-1">
-          {subItems!.map(({ icon: SubIcon, label: subLabel, href: subHref }) => (
-            <NavLink
-              key={subHref}
-              to={subHref}
-              className={({ isActive }: { isActive?: boolean }) =>
-                cn(
-                  base,
-                  "pl-2", // extra indent for sub-items
-                  isActive ? activeStyles : inactiveStyles
-                )
-              }
-            >
-              <div className="flex items-center justify-center w-5 h-5">
-                <SubIcon size={20} />
-              </div>
-              <span className="flex-1 text-sm font-medium truncate">
-                {subLabel}
-              </span>
-            </NavLink>
-          ))}
-        </div>
+      {!collapsed && (
+        <CollapsibleContent>
+          <div className="ml-6 border-l border-gray-200 dark:border-slate-700 pl-4 mt-1 space-y-1">
+            {subItems!.map(({ icon: SI, label: sLabel, href: sHref }) => (
+              <NavLink
+                key={sHref}
+                to={sHref}
+                className={({ isActive }) =>
+                  cn(base, isActive ? active : inactive, "pl-2")
+                }
+              >
+                <div className="flex items-center gap-3">
+                  <SI className="w-5 h-5 flex-shrink-0" />
+                  <span className="flex-1 text-sm font-medium truncate">{sLabel}</span>
+                </div>
+                <ChevronRight className="w-4 h-4 flex-shrink-0" />
+              </NavLink>
+            ))}
+          </div>
+        </CollapsibleContent>
       )}
-    </>
+    </Collapsible>
   );
 }
