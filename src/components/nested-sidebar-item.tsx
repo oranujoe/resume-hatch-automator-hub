@@ -25,17 +25,37 @@ export function NestedSidebarItem({
 }: NestedSidebarItemProps) {
   const [isOpen, setIsOpen] = useState(false);
 
-  // Shared classes for consistent layout
-  const base = "flex items-center transition-colors hover:bg-muted dark:hover:bg-slate-800";
-  const padding = collapsed ? "px-0 py-2 justify-center" : "gap-3 px-4 py-2 rounded-lg";
-  
-  // Modification: Use text color change without changing the container styling for active state
-  // This prevents layout shifts between active and inactive items
-  const active = "text-blue-600 font-medium dark:text-yellow-200";
+  // Consistent classes for all sidebar items
+  const base = "flex transition-colors hover:bg-muted dark:hover:bg-slate-800";
+  const padding = collapsed ? "px-0 py-2 justify-center" : "px-4 py-2 rounded-lg";
+  const active = "bg-yellow-200 text-blue-600 dark:bg-blue-900 dark:text-yellow-200";
   const inactive = "text-muted-foreground dark:text-white";
-  
-  // Separate background styling for active items that won't affect layout
-  const activeBg = "bg-yellow-200 dark:bg-blue-900";
+
+  // Create a consistent menu item layout with standardized grid
+  const renderMenuItem = (ItemIcon: LucideIcon, itemLabel: string, isItemActive = false, hasChevron = false, isOpen = false) => {
+    return (
+      <div className="grid grid-cols-[24px_1fr_auto] items-center w-full">
+        {/* Fixed-width icon container for alignment */}
+        <div className="flex items-center justify-center h-5 w-5">
+          <ItemIcon size={20} className="flex-shrink-0" />
+        </div>
+        
+        {/* Label with consistent positioning */}
+        {!collapsed && (
+          <span className={cn("text-sm font-medium ml-3", isItemActive && "font-medium")}>
+            {itemLabel}
+          </span>
+        )}
+        
+        {/* Optional chevron in the last column */}
+        {!collapsed && hasChevron && (
+          <div className="flex items-center justify-center h-5 w-5">
+            {isOpen ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+          </div>
+        )}
+      </div>
+    );
+  };
 
   // No sub-items → simple NavLink
   if (!subItems?.length) {
@@ -43,31 +63,10 @@ export function NestedSidebarItem({
       <NavLink
         to={href || "#"}
         className={({ isActive }) =>
-          cn(
-            base, 
-            padding,
-            // Apply consistent container styling regardless of active state
-            "relative", // Add relative positioning for the pseudo-element
-            isActive ? active : inactive
-          )
+          cn(base, padding, isActive ? active : inactive)
         }
       >
-        {({ isActive }) => (
-          <>
-            {/* Background layer that doesn't affect layout */}
-            {isActive && (
-              <div className={`absolute inset-0 ${activeBg} rounded-lg -z-10`}></div>
-            )}
-            
-            {/* Icon with consistent spacing */}
-            <div className="flex items-center justify-center w-5 h-5">
-              <Icon size={20} className="flex-shrink-0" />
-            </div>
-            
-            {/* Label with consistent spacing */}
-            {!collapsed && <span className="text-sm font-medium">{label}</span>}
-          </>
-        )}
+        {({ isActive }) => renderMenuItem(Icon, label, isActive)}
       </NavLink>
     );
   }
@@ -80,18 +79,10 @@ export function NestedSidebarItem({
           base,
           "w-full",
           padding,
-          isOpen ? "text-blue-600 font-medium dark:text-blue-400" : inactive
+          isOpen ? "text-blue-600 dark:text-blue-400" : inactive
         )}
       >
-        <div className="flex items-center justify-center w-5 h-5">
-          <Icon size={20} className="flex-shrink-0" />
-        </div>
-        {!collapsed && (
-          <>
-            <span className="flex-1 text-sm font-medium">{label}</span>
-            {isOpen ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
-          </>
-        )}
+        {renderMenuItem(Icon, label, false, true, isOpen)}
       </CollapsibleTrigger>
 
       <CollapsibleContent className={cn(collapsed && "hidden")}>
@@ -101,26 +92,10 @@ export function NestedSidebarItem({
               key={subHref}
               to={subHref}
               className={({ isActive }) =>
-                cn(
-                  base, 
-                  "gap-3 px-4 py-2 rounded-lg pl-2 relative",
-                  isActive ? active : inactive
-                )
+                cn(base, "px-4 py-2 rounded-lg", isActive ? active : inactive)
               }
             >
-              {({ isActive }) => (
-                <>
-                  {/* Background layer that doesn't affect layout */}
-                  {isActive && (
-                    <div className={`absolute inset-0 ${activeBg} rounded-lg -z-10`}></div>
-                  )}
-                  
-                  <div className="flex items-center justify-center w-5 h-5">
-                    <SubIcon size={20} className="flex-shrink-0" />
-                  </div>
-                  <span className="text-sm font-medium">{subLabel}</span>
-                </>
-              )}
+              {({ isActive }) => renderMenuItem(SubIcon, subLabel, isActive)}
             </NavLink>
           ))}
         </div>
@@ -128,3 +103,5 @@ export function NestedSidebarItem({
     </Collapsible>
   );
 }
+
+export default NestedSidebarItem;
