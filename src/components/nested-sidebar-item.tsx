@@ -1,12 +1,5 @@
-/* src/components/nested-sidebar-item.tsx */
-import React, {
-  useState,
-  useContext,
-  createContext,
-  PropsWithChildren,
-} from "react";
-import { NavLink, useLocation } from "react-router-dom";
-import { ChevronDown, ChevronRight, LucideIcon } from "lucide-react";
+
+t { ChevronDown, ChevronRight, LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   Collapsible,
@@ -14,20 +7,6 @@ import {
   CollapsibleContent,
 } from "@/components/ui/collapsible";
 
-/* ---------------------------- Context ---------------------------- */
-type SidebarCtx = { activeMain: string | null; setActiveMain: (k: string) => void };
-const SidebarContext = createContext<SidebarCtx>({ activeMain: null, setActiveMain: () => {} });
-
-export function SidebarProvider({ children }: PropsWithChildren) {
-  const [activeMain, setActiveMain] = useState<string | null>(null);
-  return (
-    <SidebarContext.Provider value={{ activeMain, setActiveMain }}>
-      {children}
-    </SidebarContext.Provider>
-  );
-}
-
-/* ------------------------ Sidebar Item -------------------------- */
 interface NestedSidebarItemProps {
   icon: LucideIcon;
   label: string;
@@ -43,98 +22,76 @@ export function NestedSidebarItem({
   subItems,
   collapsed = false,
 }: NestedSidebarItemProps) {
-  const { activeMain, setActiveMain } = useContext(SidebarContext);
   const [isOpen, setIsOpen] = useState(false);
-
-  const hasSub   = Array.isArray(subItems) && subItems.length > 0;
+  const hasSub = Array.isArray(subItems) && subItems.length > 0;
   const location = useLocation();
-  const mainKey  = href || label;           // unique row ID
+  
+  // Check if this item or any of its children are active
+  const isItemActive = href === location.pathname;
+  const isChildActive = hasSub && subItems!.some(item => item.href === location.pathname);
+  
+  // 1) Base layout for every row
+  const base = cn(
+    "flex items-center justify-between w-full",
+    "px-4 py-2 rounded-lg transition-colors",
+    "hover:bg-muted dark:hover:bg-slate-800"
+  );
 
-  /* URL checks so a hard‑refresh still highlights the correct tab */
-  const urlActive      = href ? location.pathname === href : false;
-  const childUrlActive = hasSub && subItems!.some(s => location.pathname === s.href);
-  const isActive       = activeMain === mainKey || urlActive || childUrlActive;
-
-  /* ---------- shared classes ---------- */
-  const outer =
-    "flex items-center w-full px-4 py-2 rounded-lg transition-colors hover:bg-muted dark:hover:bg-slate-800";
+  // 2) Color toggles
   const active   = "bg-yellow-200 text-blue-600 font-medium dark:bg-blue-900 dark:text-yellow-200";
   const inactive = "text-muted-foreground dark:text-white";
 
-  /* ---------- Left cluster (icon + text) ---------- */
+  // 3) Left side icon+label
   const Left = (
     <div className="flex items-center gap-3">
       <Icon className="w-5 h-5 flex-shrink-0" />
-      {!collapsed && <span className="text-sm font-medium truncate">{label}</span>}
+      {!collapsed && <span className="flex-1 text-sm font-medium truncate">{label}</span>}
     </div>
   );
 
-  /* ---------- Right cluster (chevron / placeholder) ---------- */
-  const ChevronIcon = !collapsed
-    ? hasSub
-      ? isOpen
-        ? <ChevronDown className="w-4 h-4 flex-shrink-0" />
-        : <ChevronRight className="w-4 h-4 flex-shrink-0" />
+  // 4) Right side chevron
+  const Right = !collapsed && (
+    hasSub
+      ? (isOpen
+          ? <ChevronDown className="w-4 h-4 flex-shrink-0" />
+          : <ChevronRight className="w-4 h-4 flex-shrink-0" />
+        )
       : <ChevronRight className="w-4 h-4 flex-shrink-0" />
-    : null;
+  );
 
-  // Always reserve the same width so every row lines up.
-  const Right = ChevronIcon ?? <span className="w-4 h-4" />;
-
-  /* ---------------- Leaf (no children) ---------------- */
+  // === Leaf ===
   if (!hasSub) {
     return (
       <NavLink
         to={href || "#"}
-        end
-        onClick={() => setActiveMain(mainKey)}
         className={({ isActive }) =>
-          cn(outer, isActive ? active : inactive, collapsed && "justify-center")
+          cn(base, isActive ? active : inactive, collapsed && "justify-center")
         }
+        end
       >
         {Left}
-        <span className="ml-auto">{Right}</span>
+        {Right}
       </NavLink>
     );
   }
 
-  /* -------------- Parent (has children) -------------- */
+  // === Branch ===
+  // For parent items, we manually control the active state
   return (
-    <Collapsible
-      open={isOpen && !collapsed}
-      onOpenChange={(open) => {
-        setIsOpen(open);
-        if (open) setActiveMain(mainKey);
-      }}
+    <Collapsible 
+      open={isOpen && !collapsed} 
+      onOpenChange={setIsOpen} 
       className="w-full"
     >
-      <CollapsibleTrigger asChild>
-        {href ? (
-          <NavLink
-            to={href}
-            end
-            onClick={() => setActiveMain(mainKey)}
-            className={({ isActive: navActive }) =>
-              cn(
-                outer,
-                navActive || isActive ? active : inactive,
-                collapsed && "justify-center"
-              )
-            }
-          >
-            {Left}
-            <span className="ml-auto">{Right}</span>
-          </NavLink>
-        ) : (
-          <button
-            type="button"
-            onClick={() => setActiveMain(mainKey)}
-            className={cn(outer, isActive ? active : inactive, collapsed && "justify-center")}
-          >
-            {Left}
-            <span className="ml-auto">{Right}</span>
-          </button>
+      <CollapsibleTrigger
+        className={cn(
+          base,
+          isChildActive && !isItemActive ? inactive : (isItemActive ? active : inactive),
+          collapsed && "justify-center"
         )}
+      >
+        {Left}
+        {Right}
       </CollapsibleTrigger>
 
       {!collapsed && (
@@ -144,19 +101,16 @@ export function NestedSidebarItem({
               <NavLink
                 key={sHref}
                 to={sHref}
-                end
-                onClick={() => setActiveMain(mainKey)}
                 className={({ isActive }) =>
-                  cn(outer, isActive ? active : inactive, "pl-2")
+                  cn(base, isActive ? active : inactive, "pl-2")
                 }
+                end
               >
                 <div className="flex items-center gap-3">
                   <SI className="w-5 h-5 flex-shrink-0" />
-                  <span className="text-sm font-medium truncate">{sLabel}</span>
+                  <span className="flex-1 text-sm font-medium truncate">{sLabel}</span>
                 </div>
-                <span className="ml-auto">
-                  <ChevronRight className="w-4 h-4 flex-shrink-0" />
-                </span>
+                <ChevronRight className="w-4 h-4 flex-shrink-0" />
               </NavLink>
             ))}
           </div>
