@@ -103,7 +103,7 @@ export function NestedSidebarItem({
         <CollapsibleTrigger
           className={cn(
             base,
-            isItemActive ? active : isChildActive ? active : inactive,
+            isChildActive ? active : inactive,
             collapsed && "justify-center"
           )}
         >
