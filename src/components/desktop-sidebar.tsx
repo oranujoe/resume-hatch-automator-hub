@@ -1,71 +1,31 @@
 
-import React from "react";
-import { ChevronRight } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { Logo } from "./logo";
-import { NestedSidebarItem } from "./nested-sidebar-item";
-import { SidebarItem } from "@/lib/sidebar-navigation";
+--- a/nested-sidebar-item.tsx
++++ b/nested-sidebar-item.tsx
+@@ export function NestedSidebarItem(...) {
+-    <Link
+-      href={href}
+-      className={cn(
+-        /* maybe missing items-center? */
+-        collapsed && "justify-center"
+-        /* ... */
+-      )}
+-    >
+-      <Icon />
+-      {!collapsed && <span>{label}</span>}
+-    </Link>
++    <Link
++      href={href}
++      className={cn(
++        "flex items-center transition-colors",
++        collapsed ? "justify-center px-2 py-2" : "gap-3 px-4 py-2 rounded-lg",
++        /* your active/inactive classes */
++      )}
++    >
++      <Icon className="w-5 h-5 flex-shrink-0" />
++      {!collapsed && (
++        <span className="text-sm font-medium truncate">
++          {label}
++        </span>
++      )}
++    </Link>
 
-interface DesktopSidebarProps {
-  items: SidebarItem[];
-  collapsed: boolean;
-  setCollapsed: (collapsed: boolean) => void;
-  className?: string;
-}
-
-export function DesktopSidebar({ 
-  items, 
-  collapsed, 
-  setCollapsed,
-  className 
-}: DesktopSidebarProps) {
-  return (
-    <div className={cn(
-      "flex-shrink-0 h-screen sticky top-0 border-r overflow-y-auto bg-white dark:bg-slate-900",
-      collapsed ? "w-[80px]" : "w-[280px]", // Increased width from 72px/260px to 80px/280px
-      className
-    )}>
-      <div className="flex h-full flex-col gap-2 p-2">
-        <div className={cn(
-          "flex h-14 items-center justify-between px-4",
-          collapsed && "justify-center px-0"
-        )}>
-          <Logo showText={!collapsed} />
-          {!collapsed && (
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="h-8 w-8"
-              onClick={() => setCollapsed(true)}
-            >
-              <ChevronRight size={16} />
-              <span className="sr-only">Collapse</span>
-            </Button>
-          )}
-        </div>
-        
-        <div className="flex-1 py-2">
-          <nav className="grid gap-2 px-3 w-full"> {/* Increased gap from 1 to 2, padding from 2 to 3, and added w-full */}
-            {items.map((item) => (
-              <NestedSidebarItem
-                key={item.label}
-                icon={item.icon}
-                label={item.label}
-                href={item.href}
-                subItems={item.subItems}
-                collapsed={collapsed}
-              />
-            ))}
-          </nav>
-        </div>
-        
-        {!collapsed && (
-          <div className="mt-auto border-t pt-4">
-            <div className="text-xs text-muted-foreground px-4">Version 1.0</div>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
