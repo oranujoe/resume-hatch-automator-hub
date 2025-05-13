@@ -38,16 +38,18 @@ export function NestedSidebarItem({
         className={({ isActive }) =>
           cn(
             "flex items-center gap-3 px-4 py-2 rounded-lg transition-colors",
-            "hover:bg-muted",
-            isActive ? "bg-yellow-200 text-blue-600 rounded-full font-medium" : "text-muted-foreground",
+            "hover:bg-muted dark:hover:bg-slate-800",
+            isActive 
+              ? "bg-yellow-200 text-blue-600 rounded-full font-medium dark:bg-blue-900 dark:text-yellow-200" 
+              : "text-muted-foreground dark:text-white",
             collapsed && "justify-center"
           )
         }
       >
         <div className="flex items-center justify-center w-5 h-5">
-          <Icon size={20} />
+          <Icon size={20} className="flex-shrink-0" />
         </div>
-        {!collapsed && <span className="text-sm font-medium">{label}</span>}
+        {!collapsed && <span className="text-sm font-medium truncate">{label}</span>}
       </NavLink>
     );
   }
@@ -63,17 +65,19 @@ export function NestedSidebarItem({
         <CollapsibleTrigger
           className={cn(
             "flex w-full items-center gap-3 px-4 py-2 rounded-lg transition-colors",
-            "hover:bg-muted",
-            isOpen ? "text-blue-600 font-medium" : "text-muted-foreground",
+            "hover:bg-muted dark:hover:bg-slate-800",
+            isOpen 
+              ? "text-blue-600 font-medium dark:text-blue-400" 
+              : "text-muted-foreground dark:text-white",
             collapsed && "justify-center"
           )}
         >
           <div className="flex items-center justify-center w-5 h-5">
-            <Icon size={20} />
+            <Icon size={20} className="flex-shrink-0" />
           </div>
           {!collapsed && (
             <>
-              <span className="text-sm font-medium flex-1">{label}</span>
+              <span className="text-sm font-medium truncate flex-1">{label}</span>
               {isOpen ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
             </>
           )}
@@ -88,15 +92,17 @@ export function NestedSidebarItem({
                 className={({ isActive }) =>
                   cn(
                     "flex items-center gap-3 px-4 py-2 rounded-lg transition-colors",
-                    "hover:bg-muted",
-                    isActive ? "bg-yellow-200 text-blue-600 rounded-full font-medium" : "text-muted-foreground"
+                    "hover:bg-muted dark:hover:bg-slate-800",
+                    isActive 
+                      ? "bg-yellow-200 text-blue-600 rounded-full font-medium dark:bg-blue-900 dark:text-yellow-200" 
+                      : "text-muted-foreground dark:text-white"
                   )
                 }
               >
                 <div className="flex items-center justify-center w-5 h-5">
-                  <item.icon size={16} />
+                  <item.icon size={16} className="flex-shrink-0" />
                 </div>
-                <span className="text-sm font-medium">{item.label}</span>
+                <span className="text-sm font-medium truncate">{item.label}</span>
               </NavLink>
             ))}
           </div>

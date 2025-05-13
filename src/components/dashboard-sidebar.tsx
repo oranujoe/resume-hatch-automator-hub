@@ -1,6 +1,5 @@
 
 import { useState, useEffect } from "react";
-import { NavLink } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { Logo } from "./logo";
 import { Button } from "@/components/ui/button";
@@ -35,41 +34,11 @@ import {
   Clock
 } from "lucide-react";
 import { NestedSidebarItem } from "./nested-sidebar-item";
+import { SidebarNavItem } from "./sidebar-nav";
 
 interface SidebarProps {
   className?: string;
 }
-
-interface SidebarItemProps {
-  icon: React.ElementType;
-  label: string;
-  href: string;
-  collapsed?: boolean;
-}
-
-export const SidebarItem = ({ 
-  icon: Icon, 
-  label, 
-  href,
-  collapsed = false 
-}: SidebarItemProps) => {
-  return (
-    <NavLink 
-      to={href} 
-      className={({ isActive }) => cn(
-        "flex items-center gap-3 px-4 py-2 rounded-lg transition-colors",
-        "hover:bg-muted",
-        isActive ? "bg-yellow-200 text-blue-600 rounded-full font-medium" : "text-muted-foreground",
-        collapsed && "justify-center"
-      )}
-    >
-      <div className="flex items-center justify-center w-5 h-5">
-        <Icon size={20} />
-      </div>
-      {!collapsed && <span className="text-sm font-medium">{label}</span>}
-    </NavLink>
-  );
-};
 
 export function DashboardSidebar({ className }: SidebarProps) {
   const [collapsed, setCollapsed] = useState(false);
@@ -186,7 +155,7 @@ export function DashboardSidebar({ className }: SidebarProps) {
           className="fixed left-4 top-4 z-50 md:hidden"
           onClick={() => setMobileOpen(true)}
         >
-          <Menu />
+          <Menu className="h-5 w-5" />
           <span className="sr-only">Open sidebar</span>
         </Button>
         
@@ -209,7 +178,7 @@ export function DashboardSidebar({ className }: SidebarProps) {
                 <span className="sr-only">Close sidebar</span>
               </Button>
             </div>
-            <nav className="flex-1 space-y-1 overflow-y-auto">
+            <nav className="flex-1 overflow-y-auto">
               {sidebarItems.map((item) => (
                 <NestedSidebarItem
                   key={item.label}
@@ -232,7 +201,7 @@ export function DashboardSidebar({ className }: SidebarProps) {
 
   return (
     <div className={cn(
-      "flex-shrink-0 h-screen sticky top-0 border-r overflow-y-auto bg-white",
+      "flex-shrink-0 h-screen sticky top-0 border-r overflow-y-auto bg-white dark:bg-slate-900",
       collapsed ? "w-[72px]" : "w-[260px]",
       className
     )}>
