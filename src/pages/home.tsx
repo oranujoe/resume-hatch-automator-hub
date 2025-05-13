@@ -239,7 +239,7 @@ export function HomePage() {
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <span className="cursor-help"><!-- TODO-v1.1: activate Analytics tab, Templates Gallery, Drop-zone, Notifications, Live Chat. --></span>
+                <span className="cursor-help">{/* TODO-v1.1: activate Analytics tab, Templates Gallery, Drop-zone, Notifications, Live Chat. */}</span>
               </TooltipTrigger>
               <TooltipContent>
                 <p>Coming soon in next version</p>
