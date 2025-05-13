@@ -48,14 +48,16 @@ export function NestedSidebarItem({
 
   const hasSub   = Array.isArray(subItems) && subItems.length > 0;
   const location = useLocation();
-  const mainKey  = href || label; // unique id for this parent row
+  const mainKey  = href || label;         // unique ID for this parent row
 
-  /* URL‑based checks in case of hard refresh */
-  const urlActive      = href === location.pathname;
-  const childUrlActive = hasSub && subItems!.some(c => c.href === location.pathname);
-  const isActive       = activeMain === mainKey || urlActive || childUrlActive;
+  /* URL‑based checks (for hard refresh / deep link) */
+  const urlActive      = href && location.pathname === href;
+  const childUrlActive = hasSub && subItems!.some(c => location.pathname === c.href);
 
-  /* ───── styling helpers ───── */
+  /* Final active decision */
+  const isActive = activeMain === mainKey || urlActive || childUrlActive;
+
+  /* ───── shared classes ───── */
   const base     = "flex items-center justify-between w-full px-4 py-2 rounded-lg transition-colors hover:bg-muted dark:hover:bg-slate-800";
   const active   = "bg-yellow-200 text-blue-600 font-medium dark:bg-blue-900 dark:text-yellow-200";
   const inactive = "text-muted-foreground dark:text-white";
@@ -63,7 +65,9 @@ export function NestedSidebarItem({
   const Left = (
     <div className="flex items-center gap-3">
       <Icon className="w-5 h-5 flex-shrink-0" />
-      {!collapsed && <span className="flex-1 text-sm font-medium truncate">{label}</span>}
+      {!collapsed && (
+        <span className="flex-1 text-sm font-medium truncate">{label}</span>
+      )}
     </div>
   );
 
@@ -81,7 +85,7 @@ export function NestedSidebarItem({
       <NavLink
         to={href || "#"}
         className={({ isActive }) =>
-          cn(base, (isActive || isActive) ? active : inactive, collapsed && "justify-center")
+          cn(base, isActive ? active : inactive, collapsed && "justify-center")
         }
         end
         onClick={() => setActiveMain(mainKey)}
@@ -96,25 +100,18 @@ export function NestedSidebarItem({
   return (
     <Collapsible
       open={isOpen && !collapsed}
-      onOpenChange={open => {
+      onOpenChange={(open) => {
         setIsOpen(open);
         if (open) setActiveMain(mainKey);
       }}
       className="w-full"
     >
-      {/* REAL NavLink inside the trigger → click = open + navigate + highlight */}
-      <CollapsibleTrigger asChild>
-        <NavLink
-          to={href || "#"}                 /* href optional */
-          end
-          className={({ isActive: nav }) =>
-            cn(base, (nav || isActive) ? active : inactive, collapsed && "justify-center")
-          }
-          onClick={() => setActiveMain(mainKey)}
-        >
-          {Left}
-          {Right}
-        </NavLink>
+      <CollapsibleTrigger
+        className={cn(base, isActive ? active : inactive, collapsed && "justify-center")}
+        onClick={() => setActiveMain(mainKey)}  /* ← highlight immediately */
+      >
+        {Left}
+        {Right}
       </CollapsibleTrigger>
 
       {!collapsed && (
@@ -132,7 +129,9 @@ export function NestedSidebarItem({
               >
                 <div className="flex items-center gap-3">
                   <SI className="w-5 h-5 flex-shrink-0" />
-                  <span className="flex-1 text-sm font-medium truncate">{sLabel}</span>
+                  <span className="flex-1 text-sm font-medium truncate">
+                    {sLabel}
+                  </span>
                 </div>
                 <ChevronRight className="w-4 h-4 flex-shrink-0" />
               </NavLink>
