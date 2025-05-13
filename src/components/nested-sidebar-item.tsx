@@ -46,9 +46,9 @@ export function NestedSidebarItem({
           )
         }
       >
-        <span className="flex-shrink-0 w-5 h-5 flex items-center justify-center">
-          <Icon className="w-5 h-5" />
-        </span>
+        <div className="flex items-center justify-center w-5 h-5">
+          <Icon size={20} className="flex-shrink-0" />
+        </div>
         {!collapsed && <span className="text-sm font-medium truncate">{label}</span>}
       </NavLink>
     );
@@ -72,9 +72,9 @@ export function NestedSidebarItem({
             collapsed && "justify-center"
           )}
         >
-          <span className="flex-shrink-0 w-5 h-5 flex items-center justify-center">
-            <Icon className="w-5 h-5" />
-          </span>
+          <div className="flex items-center justify-center w-5 h-5">
+            <Icon size={20} className="flex-shrink-0" />
+          </div>
           {!collapsed && (
             <>
               <span className="text-sm font-medium truncate flex-1">{label}</span>
@@ -99,9 +99,9 @@ export function NestedSidebarItem({
                   )
                 }
               >
-                <span className="flex-shrink-0 w-5 h-5 flex items-center justify-center">
-                  <item.icon className="w-5 h-5" />
-                </span>
+                <div className="flex items-center justify-center w-5 h-5">
+                  <item.icon size={16} className="flex-shrink-0" />
+                </div>
                 <span className="text-sm font-medium truncate">{item.label}</span>
               </NavLink>
             ))}
