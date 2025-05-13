@@ -62,7 +62,9 @@ export const SidebarItem = ({
         collapsed && "justify-center"
       )}
     >
-      <Icon size={20} className="min-w-[20px]" />
+      <div className="flex items-center justify-center w-5 h-5">
+        <Icon size={20} />
+      </div>
       {!collapsed && <span>{label}</span>}
     </NavLink>
   );

@@ -43,7 +43,9 @@ export function NestedSidebarItem({
           )
         }
       >
-        <Icon size={20} className="min-w-[20px]" />
+        <div className="flex items-center justify-center w-5 h-5">
+          <Icon size={20} />
+        </div>
         {!collapsed && <span>{label}</span>}
       </NavLink>
     );
@@ -64,7 +66,9 @@ export function NestedSidebarItem({
             collapsed && "justify-center"
           )}
         >
-          <Icon size={20} className="min-w-[20px]" />
+          <div className="flex items-center justify-center w-5 h-5">
+            <Icon size={20} />
+          </div>
           {!collapsed && (
             <>
               <span className="flex-1">{label}</span>
@@ -86,7 +90,9 @@ export function NestedSidebarItem({
                   )
                 }
               >
-                <item.icon size={16} className="min-w-[16px]" />
+                <div className="flex items-center justify-center w-4 h-4">
+                  <item.icon size={16} />
+                </div>
                 <span>{item.label}</span>
               </NavLink>
             ))}
