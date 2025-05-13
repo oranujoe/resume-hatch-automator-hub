@@ -1,3 +1,4 @@
+/* src/components/nested-sidebar-item.tsx */
 import React, {
   useState,
   useContext,
@@ -14,15 +15,8 @@ import {
 } from "@/components/ui/collapsible";
 
 /* ---------------------------- Context ---------------------------- */
-type SidebarCtx = {
-  activeMain: string | null;
-  setActiveMain: (k: string) => void;
-};
-
-const SidebarContext = createContext<SidebarCtx>({
-  activeMain: null,
-  setActiveMain: () => {},
-});
+type SidebarCtx = { activeMain: string | null; setActiveMain: (k: string) => void };
+const SidebarContext = createContext<SidebarCtx>({ activeMain: null, setActiveMain: () => {} });
 
 export function SidebarProvider({ children }: PropsWithChildren) {
   const [activeMain, setActiveMain] = useState<string | null>(null);
@@ -52,63 +46,59 @@ export function NestedSidebarItem({
   const { activeMain, setActiveMain } = useContext(SidebarContext);
   const [isOpen, setIsOpen] = useState(false);
 
-  const hasSub = Array.isArray(subItems) && subItems.length > 0;
+  const hasSub   = Array.isArray(subItems) && subItems.length > 0;
   const location = useLocation();
-  const mainKey = href || label; // unique ID
+  const mainKey  = href || label;           // unique row ID
 
-  /* URL‑based checks (for hard refresh / deep link) */
-  const urlActive = href ? location.pathname === href : false;
-  const childUrlActive =
-    hasSub && subItems!.some((c) => location.pathname === c.href);
-
-  const isActive = activeMain === mainKey || urlActive || childUrlActive;
+  /* URL checks so a hard‑refresh still highlights the correct tab */
+  const urlActive      = href ? location.pathname === href : false;
+  const childUrlActive = hasSub && subItems!.some(s => location.pathname === s.href);
+  const isActive       = activeMain === mainKey || urlActive || childUrlActive;
 
   /* ---------- shared classes ---------- */
-  const base =
-    "flex items-center justify-between w-full px-4 py-2 rounded-lg transition-colors hover:bg-muted dark:hover:bg-slate-800";
-  const active =
-    "bg-yellow-200 text-blue-600 font-medium dark:bg-blue-900 dark:text-yellow-200";
+  const outer =
+    "flex items-center w-full px-4 py-2 rounded-lg transition-colors hover:bg-muted dark:hover:bg-slate-800";
+  const active   = "bg-yellow-200 text-blue-600 font-medium dark:bg-blue-900 dark:text-yellow-200";
   const inactive = "text-muted-foreground dark:text-white";
 
+  /* ---------- Left cluster (icon + text) ---------- */
   const Left = (
     <div className="flex items-center gap-3">
       <Icon className="w-5 h-5 flex-shrink-0" />
-      {!collapsed && (
-        <span className="flex-1 text-sm font-medium truncate">{label}</span>
-      )}
+      {!collapsed && <span className="text-sm font-medium truncate">{label}</span>}
     </div>
   );
 
-  const Right =
-    !collapsed &&
-    (hasSub ? (
-      isOpen ? (
-        <ChevronDown className="w-4 h-4 flex-shrink-0" />
-      ) : (
-        <ChevronRight className="w-4 h-4 flex-shrink-0" />
-      )
-    ) : (
-      <ChevronRight className="w-4 h-4 flex-shrink-0" />
-    ));
+  /* ---------- Right cluster (chevron / placeholder) ---------- */
+  const ChevronIcon = !collapsed
+    ? hasSub
+      ? isOpen
+        ? <ChevronDown className="w-4 h-4 flex-shrink-0" />
+        : <ChevronRight className="w-4 h-4 flex-shrink-0" />
+      : <ChevronRight className="w-4 h-4 flex-shrink-0" />
+    : null;
 
-  /* ------------------ Leaf (no children) ------------------ */
+  // Always reserve the same width so every row lines up.
+  const Right = ChevronIcon ?? <span className="w-4 h-4" />;
+
+  /* ---------------- Leaf (no children) ---------------- */
   if (!hasSub) {
     return (
       <NavLink
         to={href || "#"}
-        className={({ isActive: navActive }) =>
-          cn(base, navActive ? active : inactive, collapsed && "justify-center")
-        }
         end
         onClick={() => setActiveMain(mainKey)}
+        className={({ isActive }) =>
+          cn(outer, isActive ? active : inactive, collapsed && "justify-center")
+        }
       >
         {Left}
-        {Right}
+        <span className="ml-auto">{Right}</span>
       </NavLink>
     );
   }
 
-  /* ----------------- Parent (has children) ---------------- */
+  /* -------------- Parent (has children) -------------- */
   return (
     <Collapsible
       open={isOpen && !collapsed}
@@ -126,27 +116,23 @@ export function NestedSidebarItem({
             onClick={() => setActiveMain(mainKey)}
             className={({ isActive: navActive }) =>
               cn(
-                base,
+                outer,
                 navActive || isActive ? active : inactive,
                 collapsed && "justify-center"
               )
             }
           >
             {Left}
-            {Right}
+            <span className="ml-auto">{Right}</span>
           </NavLink>
         ) : (
           <button
             type="button"
             onClick={() => setActiveMain(mainKey)}
-            className={cn(
-              base,
-              isActive ? active : inactive,
-              collapsed && "justify-center"
-            )}
+            className={cn(outer, isActive ? active : inactive, collapsed && "justify-center")}
           >
             {Left}
-            {Right}
+            <span className="ml-auto">{Right}</span>
           </button>
         )}
       </CollapsibleTrigger>
@@ -160,17 +146,17 @@ export function NestedSidebarItem({
                 to={sHref}
                 end
                 onClick={() => setActiveMain(mainKey)}
-                className={({ isActive: navActive }) =>
-                  cn(base, navActive ? active : inactive, "pl-2")
+                className={({ isActive }) =>
+                  cn(outer, isActive ? active : inactive, "pl-2")
                 }
               >
                 <div className="flex items-center gap-3">
                   <SI className="w-5 h-5 flex-shrink-0" />
-                  <span className="flex-1 text-sm font-medium truncate">
-                    {sLabel}
-                  </span>
+                  <span className="text-sm font-medium truncate">{sLabel}</span>
                 </div>
-                <ChevronRight className="w-4 h-4 flex-shrink-0" />
+                <span className="ml-auto">
+                  <ChevronRight className="w-4 h-4 flex-shrink-0" />
+                </span>
               </NavLink>
             ))}
           </div>
