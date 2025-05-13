@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { NavLink } from "react-router-dom";
 import { ChevronDown, ChevronRight, LucideIcon } from "lucide-react";
@@ -63,6 +64,8 @@ export function NestedSidebarItem({
         className={({ isActive }) =>
           cn(base, isActive ? active : inactive, collapsed && "justify-center")
         }
+        // Add exact matching to ensure only exact route matches are active
+        end
       >
         {Left}
         {Right}
@@ -94,6 +97,8 @@ export function NestedSidebarItem({
                 className={({ isActive }) =>
                   cn(base, isActive ? active : inactive, "pl-2")
                 }
+                // Add exact matching to ensure only exact route matches are active
+                end
               >
                 <div className="flex items-center gap-3">
                   <SI className="w-5 h-5 flex-shrink-0" />
