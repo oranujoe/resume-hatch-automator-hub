@@ -17,10 +17,24 @@ import {
   Settings, 
   User, 
   HelpCircle, 
-  ChevronRight, 
   Menu, 
-  X
+  X,
+  ChevronRight,
+  CreditCard,
+  Bell,
+  Shield,
+  Wrench,
+  MessageCircle,
+  FileQuestion,
+  Laptop,
+  ImageUp,
+  Newspaper,
+  FileBox,
+  GanttChartSquare,
+  BarChart,
+  Clock
 } from "lucide-react";
+import { NestedSidebarItem } from "./nested-sidebar-item";
 
 interface SidebarProps {
   className?: string;
@@ -73,18 +87,91 @@ export function DashboardSidebar({ className }: SidebarProps) {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  // Define sidebar navigation with nested structure
   const sidebarItems = [
-    { icon: Home, label: "Home", href: "/dashboard" },
-    { icon: FileSearch, label: "Job Parser", href: "/job-parser" },
-    { icon: Briefcase, label: "Applications", href: "/applications" },
-    { icon: FileText, label: "Documents", href: "/documents" },
-    { icon: BookOpen, label: "Knowledge Base", href: "/knowledge-base" },
-    { icon: LayoutDashboard, label: "Job Feed", href: "/job-feed" },
-    { icon: CalendarClock, label: "Interview Prep", href: "/interview-prep" },
-    { icon: Users, label: "Referrals", href: "/referrals" },
-    { icon: Settings, label: "Settings", href: "/settings" },
-    { icon: User, label: "Profile", href: "/profile" },
-    { icon: HelpCircle, label: "Help", href: "/help" },
+    { 
+      icon: Home, 
+      label: "Home", 
+      href: "/dashboard"
+    },
+    { 
+      icon: FileSearch, 
+      label: "Job Parser", 
+      subItems: [
+        { icon: FileSearch, label: "Parse & Apply", href: "/job-parser" },
+        { icon: Laptop, label: "Drop-zone (Chrome)", href: "/job-parser/dropzone" },
+        { icon: Clock, label: "Bulk Queue", href: "/job-parser/bulk-queue" }
+      ]
+    },
+    { 
+      icon: Briefcase, 
+      label: "Applications", 
+      subItems: [
+        { icon: Briefcase, label: "My Applications", href: "/applications" },
+        { icon: BarChart, label: "Analytics", href: "/applications/analytics" },
+        { icon: GanttChartSquare, label: "Funnel View", href: "/applications/funnel" }
+      ]
+    },
+    { 
+      icon: FileText, 
+      label: "Documents", 
+      subItems: [
+        { icon: FileText, label: "Résumés", href: "/documents/resumes" },
+        { icon: Newspaper, label: "Cover Letters", href: "/documents/cover-letters" },
+        { icon: ImageUp, label: "Templates Gallery", href: "/documents/templates" },
+        { icon: FileBox, label: "Document Locker", href: "/documents/locker" }
+      ]
+    },
+    { 
+      icon: BookOpen, 
+      label: "Knowledge Base", 
+      subItems: [
+        { icon: User, label: "Profile Data", href: "/knowledge-base" },
+        { icon: BookOpen, label: "Skills Gap", href: "/knowledge-base/skills-gap" }
+      ]
+    },
+    { 
+      icon: LayoutDashboard, 
+      label: "Job Feed", 
+      href: "/job-feed" 
+    },
+    { 
+      icon: CalendarClock, 
+      label: "Interview Prep",
+      subItems: [
+        { icon: MessageCircle, label: "AI Coach", href: "/interview-prep" },
+        { icon: CalendarClock, label: "Scheduler", href: "/interview-prep/scheduler" },
+        { icon: Bell, label: "Follow-Ups", href: "/interview-prep/follow-ups" }
+      ] 
+    },
+    { 
+      icon: Users, 
+      label: "Referrals", 
+      href: "/referrals" 
+    },
+    { 
+      icon: Settings, 
+      label: "Settings", 
+      subItems: [
+        { icon: Shield, label: "Account Security", href: "/settings" },
+        { icon: CreditCard, label: "Wallet & Billing", href: "/settings/wallet" },
+        { icon: Bell, label: "Notifications", href: "/settings/notifications" },
+        { icon: Wrench, label: "Integrations", href: "/settings/integrations" }
+      ]
+    },
+    { 
+      icon: User, 
+      label: "Profile", 
+      href: "/profile" 
+    },
+    { 
+      icon: HelpCircle, 
+      label: "Help",
+      subItems: [
+        { icon: FileQuestion, label: "Docs / FAQ", href: "/help" },
+        { icon: MessageCircle, label: "Live Chat", href: "/help/chat" }
+      ] 
+    },
   ];
 
   if (isMobile) {
@@ -119,19 +206,19 @@ export function DashboardSidebar({ className }: SidebarProps) {
                 <span className="sr-only">Close sidebar</span>
               </Button>
             </div>
-            <nav className="flex-1 space-y-1">
+            <nav className="flex-1 space-y-1 overflow-y-auto">
               {sidebarItems.map((item) => (
-                <SidebarItem 
-                  key={item.href} 
-                  icon={item.icon} 
-                  label={item.label} 
+                <NestedSidebarItem
+                  key={item.label}
+                  icon={item.icon}
+                  label={item.label}
                   href={item.href}
+                  subItems={item.subItems}
                   collapsed={false}
                 />
               ))}
             </nav>
             <div className="pt-4 border-t">
-              {/* Version or user info could go here */}
               <div className="text-xs text-muted-foreground">Version 1.0</div>
             </div>
           </div>
@@ -168,11 +255,12 @@ export function DashboardSidebar({ className }: SidebarProps) {
         <div className="flex-1 py-4">
           <nav className="grid gap-1">
             {sidebarItems.map((item) => (
-              <SidebarItem 
-                key={item.href} 
-                icon={item.icon} 
-                label={item.label} 
+              <NestedSidebarItem
+                key={item.label}
+                icon={item.icon}
+                label={item.label}
                 href={item.href}
+                subItems={item.subItems}
                 collapsed={collapsed}
               />
             ))}
@@ -181,7 +269,6 @@ export function DashboardSidebar({ className }: SidebarProps) {
         
         {!collapsed && (
           <div className="mt-auto border-t pt-4">
-            {/* Version or user info could go here */}
             <div className="text-xs text-muted-foreground px-4">Version 1.0</div>
           </div>
         )}
