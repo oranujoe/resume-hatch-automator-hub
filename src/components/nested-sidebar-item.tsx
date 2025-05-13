@@ -1,4 +1,6 @@
-import React, {
+<SidebarProvider>
+  {/* …all <NestedSidebarItem …/> nodes… */}
+  import React, {
   useState,
   useContext,
   createContext,
@@ -128,3 +130,5 @@ export function NestedSidebarItem({
     </Collapsible>
   );
 }
+
+</SidebarProvider>
