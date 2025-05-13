@@ -1,23 +1,18 @@
-
 import React, { useState } from "react";
 import { NavLink } from "react-router-dom";
 import { ChevronDown, ChevronRight, LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { 
+import {
   Collapsible,
-  CollapsibleContent,
   CollapsibleTrigger,
+  CollapsibleContent,
 } from "@/components/ui/collapsible";
 
 interface NestedSidebarItemProps {
   icon: LucideIcon;
   label: string;
   href?: string;
-  subItems?: {
-    icon: LucideIcon;
-    label: string;
-    href: string;
-  }[];
+  subItems?: { icon: LucideIcon; label: string; href: string }[];
   collapsed?: boolean;
 }
 
@@ -29,85 +24,64 @@ export function NestedSidebarItem({
   collapsed = false,
 }: NestedSidebarItemProps) {
   const [isOpen, setIsOpen] = useState(false);
-  
-  // If there are no sub-items, render a regular sidebar item
-  if (!subItems || subItems.length === 0) {
+
+  // Shared classes
+  const base = "flex items-center transition-colors hover:bg-muted dark:hover:bg-slate-800";
+  const padding = collapsed ? "px-0 py-2 justify-center" : "gap-3 px-4 py-2 rounded-lg";
+  const active = "bg-yellow-200 text-blue-600 rounded-full font-medium dark:bg-blue-900 dark:text-yellow-200";
+  const inactive = "text-muted-foreground dark:text-white";
+
+  // No sub-items → simple NavLink
+  if (!subItems?.length) {
     return (
       <NavLink
         to={href || "#"}
         className={({ isActive }) =>
-          cn(
-            "flex items-center gap-3 px-4 py-2 rounded-lg transition-colors",
-            "hover:bg-muted dark:hover:bg-slate-800",
-            isActive 
-              ? "bg-yellow-200 text-blue-600 rounded-full font-medium dark:bg-blue-900 dark:text-yellow-200" 
-              : "text-muted-foreground dark:text-white",
-            collapsed && "justify-center"
-          )
+          cn(base, padding, isActive ? active : inactive)
         }
       >
-        <div className="flex items-center justify-center w-5 h-5">
-          <Icon size={20} className="flex-shrink-0" />
-        </div>
+        <Icon className="w-5 h-5 flex-shrink-0" />
         {!collapsed && <span className="text-sm font-medium truncate">{label}</span>}
       </NavLink>
     );
   }
 
-  // If there are sub-items, render a collapsible section
+  // Has sub-items → collapsible
   return (
-    <div>
-      <Collapsible
-        open={isOpen && !collapsed}
-        onOpenChange={setIsOpen}
-        className="w-full"
+    <Collapsible open={isOpen && !collapsed} onOpenChange={setIsOpen} className="w-full">
+      <CollapsibleTrigger
+        className={cn(
+          base,
+          "w-full",
+          padding,
+          isOpen ? "text-blue-600 font-medium dark:text-blue-400" : inactive
+        )}
       >
-        <CollapsibleTrigger
-          className={cn(
-            "flex w-full items-center gap-3 px-4 py-2 rounded-lg transition-colors",
-            "hover:bg-muted dark:hover:bg-slate-800",
-            isOpen 
-              ? "text-blue-600 font-medium dark:text-blue-400" 
-              : "text-muted-foreground dark:text-white",
-            collapsed && "justify-center"
-          )}
-        >
-          <div className="flex items-center justify-center w-5 h-5">
-            <Icon size={20} className="flex-shrink-0" />
-          </div>
-          {!collapsed && (
-            <>
-              <span className="text-sm font-medium truncate flex-1">{label}</span>
-              {isOpen ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
-            </>
-          )}
-        </CollapsibleTrigger>
-        
-        <CollapsibleContent className={cn(collapsed && "hidden")}>
-          <div className="ml-6 mt-1 flex flex-col gap-1 border-l pl-2">
-            {subItems.map((item) => (
-              <NavLink
-                key={item.href}
-                to={item.href}
-                className={({ isActive }) =>
-                  cn(
-                    "flex items-center gap-3 px-4 py-2 rounded-lg transition-colors",
-                    "hover:bg-muted dark:hover:bg-slate-800",
-                    isActive 
-                      ? "bg-yellow-200 text-blue-600 rounded-full font-medium dark:bg-blue-900 dark:text-yellow-200" 
-                      : "text-muted-foreground dark:text-white"
-                  )
-                }
-              >
-                <div className="flex items-center justify-center w-5 h-5">
-                  <item.icon size={16} className="flex-shrink-0" />
-                </div>
-                <span className="text-sm font-medium truncate">{item.label}</span>
-              </NavLink>
-            ))}
-          </div>
-        </CollapsibleContent>
-      </Collapsible>
-    </div>
+        <Icon className="w-5 h-5 flex-shrink-0" />
+        {!collapsed && (
+          <>
+            <span className="flex-1 text-sm font-medium truncate">{label}</span>
+            {isOpen ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+          </>
+        )}
+      </CollapsibleTrigger>
+
+      <CollapsibleContent className={cn(collapsed && "hidden")}>
+        <div className="border-l border-gray-200 dark:border-slate-700 pl-6 mt-1 flex flex-col space-y-1">
+          {subItems.map(({ icon: SubIcon, label: subLabel, href: subHref }) => (
+            <NavLink
+              key={subHref}
+              to={subHref}
+              className={({ isActive }) =>
+                cn(base, "gap-3 px-4 py-2 rounded-lg pl-2", isActive ? active : inactive)
+              }
+            >
+              <SubIcon className="w-5 h-5 flex-shrink-0" />
+              <span className="text-sm font-medium truncate">{subLabel}</span>
+            </NavLink>
+          ))}
+        </div>
+      </CollapsibleContent>
+    </Collapsible>
   );
 }
