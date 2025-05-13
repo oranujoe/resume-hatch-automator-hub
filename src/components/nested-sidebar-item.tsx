@@ -40,7 +40,9 @@ export function NestedSidebarItem({
           cn(base, padding, isActive ? active : inactive)
         }
       >
-        <Icon className="w-5 h-5 flex-shrink-0" />
+        <div className="flex items-center justify-center w-5 h-5">
+          <Icon size={20} className="flex-shrink-0" />
+        </div>
         {!collapsed && <span className="text-sm font-medium truncate">{label}</span>}
       </NavLink>
     );
@@ -57,7 +59,9 @@ export function NestedSidebarItem({
           isOpen ? "text-blue-600 font-medium dark:text-blue-400" : inactive
         )}
       >
-        <Icon className="w-5 h-5 flex-shrink-0" />
+        <div className="flex items-center justify-center w-5 h-5">
+          <Icon size={20} className="flex-shrink-0" />
+        </div>
         {!collapsed && (
           <>
             <span className="flex-1 text-sm font-medium truncate">{label}</span>
@@ -76,7 +80,9 @@ export function NestedSidebarItem({
                 cn(base, "gap-3 px-4 py-2 rounded-lg pl-2", isActive ? active : inactive)
               }
             >
-              <SubIcon className="w-5 h-5 flex-shrink-0" />
+              <div className="flex items-center justify-center w-5 h-5">
+                <SubIcon size={20} className="flex-shrink-0" />
+              </div>
               <span className="text-sm font-medium truncate">{subLabel}</span>
             </NavLink>
           ))}
