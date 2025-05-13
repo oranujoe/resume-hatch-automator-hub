@@ -1,104 +1,97 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { NavLink } from "react-router-dom";
-import { LucideIcon } from "lucide-react";
+import { ChevronDown, ChevronRight, LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
+import {
+  Collapsible,
+  CollapsibleTrigger,
+  CollapsibleContent,
+} from "@/components/ui/collapsible";
 
-export interface SidebarNavItemProps {
+interface NestedSidebarItemProps {
   icon: LucideIcon;
   label: string;
-  href: string;
-  isActive?: boolean;
+  href?: string;
+  subItems?: { icon: LucideIcon; label: string; href: string }[];
   collapsed?: boolean;
 }
 
-export const SidebarNavItem = ({ 
-  icon: Icon, 
-  label, 
+export function NestedSidebarItem({
+  icon: Icon,
+  label,
   href,
-  isActive,
-  collapsed = false 
-}: SidebarNavItemProps) => {
-  return (
-    <NavLink 
-      to={href} 
-      className={({ isActive: routeActive }) => cn(
-        "flex items-center gap-3 px-4 py-2 rounded-lg transition-colors",
-        "hover:bg-muted dark:hover:bg-slate-800",
-        (isActive || routeActive) 
-          ? "bg-yellow-200 text-blue-600 rounded-full font-medium dark:bg-blue-900 dark:text-yellow-200" 
-          : "text-muted-foreground dark:text-white",
-        collapsed && "justify-center"
-      )}
-    >
-      <div className="flex items-center justify-center w-5 h-5">
-        <Icon size={20} className="flex-shrink-0" />
-      </div>
-      {!collapsed && <span className="text-sm font-medium">{label}</span>}
-    </NavLink>
-  );
-};
+  subItems,
+  collapsed = false,
+}: NestedSidebarItemProps) {
+  const [isOpen, setIsOpen] = useState(false);
 
-interface SidebarNavProps {
-  items: Array<{
-    icon: LucideIcon;
-    label: string;
-    href: string;
-    isActive?: boolean;
-    subItems?: Array<{
-      icon: LucideIcon;
-      label: string;
-      href: string;
-      isActive?: boolean;
-    }>;
-  }>;
-  collapsed?: boolean;
-  className?: string;
-}
+  // Shared classes - standardized gap for consistent spacing
+  const base = "flex items-center transition-colors hover:bg-muted dark:hover:bg-slate-800";
+  // Use a consistent gap-3 (0.75rem) for all items
+  const padding = collapsed ? "px-0 py-2 justify-center" : "gap-3 px-4 py-2 rounded-lg";
+  const active = "bg-yellow-200 text-blue-600 rounded-full font-medium dark:bg-blue-900 dark:text-yellow-200";
+  const inactive = "text-muted-foreground dark:text-white";
 
-export function SidebarNav({ items, collapsed = false, className }: SidebarNavProps) {
+  // No sub-items → simple NavLink
+  if (!subItems?.length) {
+    return (
+      <NavLink
+        to={href || "#"}
+        className={({ isActive }) =>
+          cn(base, padding, isActive ? active : inactive)
+        }
+      >
+        <div className="flex items-center justify-center w-5 h-5">
+          <Icon size={20} className="flex-shrink-0" />
+        </div>
+        {!collapsed && <span className="text-sm font-medium">{label}</span>}
+      </NavLink>
+    );
+  }
+
+  // Has sub-items → collapsible
   return (
-    <nav className={cn("grid gap-1 px-2", className)}>
-      {items.map((item) => (
-        <React.Fragment key={item.label}>
-          {!item.subItems || item.subItems.length === 0 ? (
-            <SidebarNavItem
-              icon={item.icon}
-              label={item.label}
-              href={item.href}
-              isActive={item.isActive}
-              collapsed={collapsed}
-            />
-          ) : (
-            <div className="space-y-1">
-              <SidebarNavItem
-                icon={item.icon}
-                label={item.label}
-                href={item.href}
-                isActive={item.isActive}
-                collapsed={collapsed}
-              />
-              {!collapsed && item.subItems && (
-                <div className="ml-6 flex flex-col gap-1 border-l pl-2">
-                  {item.subItems.map((subItem) => (
-                    <SidebarNavItem
-                      key={subItem.href}
-                      icon={subItem.icon}
-                      label={subItem.label}
-                      href={subItem.href}
-                      isActive={subItem.isActive}
-                      collapsed={collapsed}
-                    />
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-        </React.Fragment>
-      ))}
-    </nav>
+    <Collapsible open={isOpen && !collapsed} onOpenChange={setIsOpen} className="w-full">
+      <CollapsibleTrigger
+        className={cn(
+          base,
+          "w-full",
+          padding,
+          isOpen ? "text-blue-600 font-medium dark:text-blue-400" : inactive
+        )}
+      >
+        <div className="flex items-center justify-center w-5 h-5">
+          <Icon size={20} className="flex-shrink-0" />
+        </div>
+        {!collapsed && (
+          <>
+            <span className="flex-1 text-sm font-medium">{label}</span>
+            {isOpen ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+          </>
+        )}
+      </CollapsibleTrigger>
+
+      <CollapsibleContent className={cn(collapsed && "hidden")}>
+        <div className="border-l border-gray-200 dark:border-slate-700 pl-6 mt-1 flex flex-col space-y-1">
+          {subItems.map(({ icon: SubIcon, label: subLabel, href: subHref }) => (
+            <NavLink
+              key={subHref}
+              to={subHref}
+              className={({ isActive }) =>
+                cn(base, "gap-3 px-4 py-2 rounded-lg pl-2", isActive ? active : inactive)
+              }
+            >
+              <div className="flex items-center justify-center w-5 h-5">
+                <SubIcon size={20} className="flex-shrink-0" />
+              </div>
+              <span className="text-sm font-medium">{subLabel}</span>
+            </NavLink>
+          ))}
+        </div>
+      </CollapsibleContent>
+    </Collapsible>
   );
 }
 
-// Add this export to match what dashboard-sidebar.tsx is expecting
-export { SidebarNav as NestedSidebarItem };
+// Delete the SidebarNavItem and SidebarNav components since we're now using NestedSidebarItem directly

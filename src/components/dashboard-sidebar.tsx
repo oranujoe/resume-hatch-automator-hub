@@ -34,7 +34,6 @@ import {
   Clock
 } from "lucide-react";
 import { NestedSidebarItem } from "./nested-sidebar-item";
-import { SidebarNavItem } from "./sidebar-nav";
 
 interface SidebarProps {
   className?: string;
@@ -184,7 +183,7 @@ export function DashboardSidebar({ className }: SidebarProps) {
                   key={item.label}
                   icon={item.icon}
                   label={item.label}
-                  href={item.href}
+                  href={item.href || "#"}
                   subItems={item.subItems}
                   collapsed={false}
                 />
@@ -231,7 +230,7 @@ export function DashboardSidebar({ className }: SidebarProps) {
                 key={item.label}
                 icon={item.icon}
                 label={item.label}
-                href={item.href}
+                href={item.href || "#"}
                 subItems={item.subItems}
                 collapsed={collapsed}
               />
