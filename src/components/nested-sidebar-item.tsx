@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { NavLink } from "react-router-dom";
 import { ChevronDown, ChevronRight, LucideIcon } from "lucide-react";
@@ -17,6 +16,7 @@ interface NestedSidebarItemProps {
   collapsed?: boolean;
 }
 
+// Make sure to export the component correctly
 export function NestedSidebarItem({
   icon: Icon,
   label,
@@ -94,4 +94,5 @@ export function NestedSidebarItem({
   );
 }
 
-// Delete the SidebarNavItem and SidebarNav components since we're now using NestedSidebarItem directly
+// Add a default export as well to ensure compatibility
+export default NestedSidebarItem;
