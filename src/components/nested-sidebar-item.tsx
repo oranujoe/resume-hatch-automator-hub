@@ -1,6 +1,6 @@
 
 import React, { useState } from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useLocation } from "react-router-dom";
 import { ChevronDown, ChevronRight, LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -26,7 +26,12 @@ export function NestedSidebarItem({
 }: NestedSidebarItemProps) {
   const [isOpen, setIsOpen] = useState(false);
   const hasSub = Array.isArray(subItems) && subItems.length > 0;
-
+  const location = useLocation();
+  
+  // Check if this item or any of its children are active
+  const isItemActive = href === location.pathname;
+  const isChildActive = hasSub && subItems!.some(item => item.href === location.pathname);
+  
   // 1) Base layout for every row
   const base = cn(
     "flex items-center justify-between w-full",
@@ -64,7 +69,6 @@ export function NestedSidebarItem({
         className={({ isActive }) =>
           cn(base, isActive ? active : inactive, collapsed && "justify-center")
         }
-        // Add exact matching to ensure only exact route matches are active
         end
       >
         {Left}
@@ -74,12 +78,17 @@ export function NestedSidebarItem({
   }
 
   // === Branch ===
+  // For parent items, we manually control the active state
   return (
-    <Collapsible open={isOpen && !collapsed} onOpenChange={setIsOpen} className="w-full">
+    <Collapsible 
+      open={isOpen && !collapsed} 
+      onOpenChange={setIsOpen} 
+      className="w-full"
+    >
       <CollapsibleTrigger
         className={cn(
           base,
-          isOpen ? active : inactive,
+          isChildActive && !isItemActive ? inactive : (isItemActive ? active : inactive),
           collapsed && "justify-center"
         )}
       >
@@ -97,7 +106,6 @@ export function NestedSidebarItem({
                 className={({ isActive }) =>
                   cn(base, isActive ? active : inactive, "pl-2")
                 }
-                // Add exact matching to ensure only exact route matches are active
                 end
               >
                 <div className="flex items-center gap-3">
