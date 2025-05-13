@@ -1,3 +1,4 @@
+
 import React from "react";
 import { NavLink } from "react-router-dom";
 import { LucideIcon } from "lucide-react";
@@ -98,3 +99,6 @@ export function SidebarNav({ items, collapsed = false, className }: SidebarNavPr
     </nav>
   );
 }
+
+// Add this export to match what dashboard-sidebar.tsx is expecting
+export { SidebarNav as NestedSidebarItem };
