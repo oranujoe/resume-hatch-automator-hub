@@ -1,6 +1,5 @@
-<SidebarProvider>
-  {/* …all <NestedSidebarItem …/> nodes… */}
-  import React, {
+
+import React, {
   useState,
   useContext,
   createContext,
@@ -43,7 +42,7 @@ export function NestedSidebarItem({
 
   const hasSub      = Array.isArray(subItems) && subItems.length > 0;
   const location    = useLocation();
-  const mainKey     = href || label;          // unique id for this “main” row
+  const mainKey     = href || label;          // unique id for this "main" row
 
   const pathActive      = location.pathname === href;
   const childPathActive = hasSub && subItems!.some(c => c.href === location.pathname);
@@ -94,12 +93,11 @@ export function NestedSidebarItem({
       }}
       className="w-full"
     >
-      {/* ↓↓↓ MOVE the click handler **inside** the child element ↓↓↓ */}
       <CollapsibleTrigger asChild className={cn(base, isActive ? active : inactive, collapsed && "justify-center")}>
         <button
           type="button"
           className="w-full"
-          onClick={() => setActiveMain(mainKey)}        {/* ← this line changed */}
+          onClick={() => setActiveMain(mainKey)}
         >
           {Left}
           {Right}
@@ -115,7 +113,7 @@ export function NestedSidebarItem({
                 to={sHref}
                 className={({ isActive: nav }) => cn(base, nav ? active : inactive, "pl-2")}
                 end
-                onClick={() => setActiveMain(mainKey)}   /* keep parent highlighted */
+                onClick={() => setActiveMain(mainKey)}
               >
                 <div className="flex items-center gap-3">
                   <SI className="w-5 h-5 flex-shrink-0" />
@@ -130,5 +128,3 @@ export function NestedSidebarItem({
     </Collapsible>
   );
 }
-
-</SidebarProvider>
