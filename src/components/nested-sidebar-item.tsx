@@ -37,13 +37,13 @@ export function NestedSidebarItem({
         to={href || "#"}
         className={({ isActive }) =>
           cn(
-            "flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:bg-accent/50",
+            "flex items-center gap-3 rounded-lg px-3 py-2.5 transition-all hover:bg-accent/50",
             isActive ? "text-primary font-medium bg-accent/50" : "text-muted-foreground",
             collapsed && "justify-center"
           )
         }
       >
-        <Icon size={20} />
+        <Icon size={20} className="min-w-[20px]" />
         {!collapsed && <span>{label}</span>}
       </NavLink>
     );
@@ -59,12 +59,12 @@ export function NestedSidebarItem({
       >
         <CollapsibleTrigger
           className={cn(
-            "flex w-full items-center gap-3 rounded-lg px-3 py-2 transition-all hover:bg-accent/50",
+            "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 transition-all hover:bg-accent/50",
             isOpen ? "text-primary font-medium" : "text-muted-foreground",
             collapsed && "justify-center"
           )}
         >
-          <Icon size={20} />
+          <Icon size={20} className="min-w-[20px]" />
           {!collapsed && (
             <>
               <span className="flex-1">{label}</span>
@@ -86,7 +86,7 @@ export function NestedSidebarItem({
                   )
                 }
               >
-                <item.icon size={16} />
+                <item.icon size={16} className="min-w-[16px]" />
                 <span>{item.label}</span>
               </NavLink>
             ))}

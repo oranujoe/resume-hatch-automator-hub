@@ -57,12 +57,12 @@ export const SidebarItem = ({
     <NavLink 
       to={href} 
       className={({ isActive }) => cn(
-        "flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:bg-accent/50",
+        "flex items-center gap-3 rounded-lg px-3 py-2.5 transition-all hover:bg-accent/50",
         isActive ? "text-primary font-medium bg-accent/50" : "text-muted-foreground",
         collapsed && "justify-center"
       )}
     >
-      <Icon size={20} />
+      <Icon size={20} className="min-w-[20px]" />
       {!collapsed && <span>{label}</span>}
     </NavLink>
   );
@@ -252,8 +252,8 @@ export function DashboardSidebar({ className }: SidebarProps) {
           )}
         </div>
         
-        <div className="flex-1 py-4">
-          <nav className="grid gap-1">
+        <div className="flex-1 py-2">
+          <nav className="grid gap-1 px-2">
             {sidebarItems.map((item) => (
               <NestedSidebarItem
                 key={item.label}
