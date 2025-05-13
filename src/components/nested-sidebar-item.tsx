@@ -1,4 +1,4 @@
-
+/* nested-sidebar-item.tsx */
 import React, {
   useState,
   useContext,
@@ -15,17 +15,19 @@ import {
 } from "@/components/ui/collapsible";
 
 /* ───────────────────────── ❶ CONTEXT ────────────────────────── */
-
 type SidebarCtx = { activeMain: string | null; setActiveMain: (k: string) => void };
 const SidebarContext = createContext<SidebarCtx>({ activeMain: null, setActiveMain: () => {} });
 
 export function SidebarProvider({ children }: PropsWithChildren) {
   const [activeMain, setActiveMain] = useState<string | null>(null);
-  return <SidebarContext.Provider value={{ activeMain, setActiveMain }}>{children}</SidebarContext.Provider>;
+  return (
+    <SidebarContext.Provider value={{ activeMain, setActiveMain }}>
+      {children}
+    </SidebarContext.Provider>
+  );
 }
 
 /* ─────────────────── ❷ SIDEBAR ITEM COMPONENT ────────────────── */
-
 interface NestedSidebarItemProps {
   icon: LucideIcon;
   label: string;
@@ -35,18 +37,23 @@ interface NestedSidebarItemProps {
 }
 
 export function NestedSidebarItem({
-  icon: Icon, label, href, subItems, collapsed = false,
+  icon: Icon,
+  label,
+  href,
+  subItems,
+  collapsed = false,
 }: NestedSidebarItemProps) {
   const { activeMain, setActiveMain } = useContext(SidebarContext);
   const [isOpen, setIsOpen] = useState(false);
 
-  const hasSub      = Array.isArray(subItems) && subItems.length > 0;
-  const location    = useLocation();
-  const mainKey     = href || label;          // unique id for this "main" row
+  const hasSub   = Array.isArray(subItems) && subItems.length > 0;
+  const location = useLocation();
+  const mainKey  = href || label; // unique id for this parent row
 
-  const pathActive      = location.pathname === href;
-  const childPathActive = hasSub && subItems!.some(c => c.href === location.pathname);
-  const isActive        = activeMain === mainKey || pathActive || childPathActive;
+  /* URL‑based checks in case of hard refresh */
+  const urlActive      = href === location.pathname;
+  const childUrlActive = hasSub && subItems!.some(c => c.href === location.pathname);
+  const isActive       = activeMain === mainKey || urlActive || childUrlActive;
 
   /* ───── styling helpers ───── */
   const base     = "flex items-center justify-between w-full px-4 py-2 rounded-lg transition-colors hover:bg-muted dark:hover:bg-slate-800";
@@ -73,7 +80,9 @@ export function NestedSidebarItem({
     return (
       <NavLink
         to={href || "#"}
-        className={({ isActive: nav }) => cn(base, nav || isActive ? active : inactive, collapsed && "justify-center")}
+        className={({ isActive }) =>
+          cn(base, (isActive || isActive) ? active : inactive, collapsed && "justify-center")
+        }
         end
         onClick={() => setActiveMain(mainKey)}
       >
@@ -93,15 +102,19 @@ export function NestedSidebarItem({
       }}
       className="w-full"
     >
-      <CollapsibleTrigger asChild className={cn(base, isActive ? active : inactive, collapsed && "justify-center")}>
-        <button
-          type="button"
-          className="w-full"
+      {/* REAL NavLink inside the trigger → click = open + navigate + highlight */}
+      <CollapsibleTrigger asChild>
+        <NavLink
+          to={href || "#"}                 /* href optional */
+          end
+          className={({ isActive: nav }) =>
+            cn(base, (nav || isActive) ? active : inactive, collapsed && "justify-center")
+          }
           onClick={() => setActiveMain(mainKey)}
         >
           {Left}
           {Right}
-        </button>
+        </NavLink>
       </CollapsibleTrigger>
 
       {!collapsed && (
@@ -111,9 +124,11 @@ export function NestedSidebarItem({
               <NavLink
                 key={sHref}
                 to={sHref}
-                className={({ isActive: nav }) => cn(base, nav ? active : inactive, "pl-2")}
+                className={({ isActive }) =>
+                  cn(base, isActive ? active : inactive, "pl-2")
+                }
                 end
-                onClick={() => setActiveMain(mainKey)}
+                onClick={() => setActiveMain(mainKey)} // keep parent highlighted
               >
                 <div className="flex items-center gap-3">
                   <SI className="w-5 h-5 flex-shrink-0" />
