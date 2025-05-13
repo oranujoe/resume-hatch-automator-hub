@@ -23,7 +23,7 @@ export function DesktopSidebar({
   return (
     <div className={cn(
       "flex-shrink-0 h-screen sticky top-0 border-r overflow-y-auto bg-white dark:bg-slate-900",
-      collapsed ? "w-[72px]" : "w-[260px]",
+      collapsed ? "w-[80px]" : "w-[280px]", // Increased width from 72px/260px to 80px/280px
       className
     )}>
       <div className="flex h-full flex-col gap-2 p-2">
@@ -46,7 +46,7 @@ export function DesktopSidebar({
         </div>
         
         <div className="flex-1 py-2">
-          <nav className="grid gap-1 px-2">
+          <nav className="grid gap-2 px-3 w-full"> {/* Increased gap from 1 to 2, padding from 2 to 3, and added w-full */}
             {items.map((item) => (
               <NestedSidebarItem
                 key={item.label}
