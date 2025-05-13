@@ -40,7 +40,7 @@ export function NestedSidebarItem({
   );
 
   // 2) Color toggles
-  const active   = "bg-yellow-200 text-blue-600 font-medium dark:bg-blue-900 dark:text-yellow-200";
+  const active = "bg-yellow-200 text-blue-600 font-medium dark:bg-blue-900 dark:text-yellow-200";
   const inactive = "text-muted-foreground dark:text-white";
 
   // 3) Left side icon+label
@@ -58,7 +58,7 @@ export function NestedSidebarItem({
           ? <ChevronDown className="w-4 h-4 flex-shrink-0" />
           : <ChevronRight className="w-4 h-4 flex-shrink-0" />
         )
-      : <ChevronRight className="w-4 h-4 flex-shrink-0" />
+      : null
   );
 
   // === Leaf ===
@@ -78,23 +78,39 @@ export function NestedSidebarItem({
   }
 
   // === Branch ===
-  // For parent items, we manually control the active state
+  // When this is a parent item with a direct href and we're on that path, 
+  // ensure it shows as active regardless of child selection
   return (
     <Collapsible 
       open={isOpen && !collapsed} 
       onOpenChange={setIsOpen} 
       className="w-full"
     >
-      <CollapsibleTrigger
-        className={cn(
-          base,
-          isChildActive && !isItemActive ? inactive : (isItemActive ? active : inactive),
-          collapsed && "justify-center"
-        )}
-      >
-        {Left}
-        {Right}
-      </CollapsibleTrigger>
+      {href ? (
+        <NavLink
+          to={href}
+          className={({ isActive }) =>
+            cn(base, isActive ? active : inactive, collapsed && "justify-center")
+          }
+          end
+        >
+          {Left}
+          {!collapsed && (
+            hasSub ? (isOpen ? <ChevronDown className="w-4 h-4 flex-shrink-0" /> : <ChevronRight className="w-4 h-4 flex-shrink-0" />) : null
+          )}
+        </NavLink>
+      ) : (
+        <CollapsibleTrigger
+          className={cn(
+            base,
+            isItemActive ? active : isChildActive ? active : inactive,
+            collapsed && "justify-center"
+          )}
+        >
+          {Left}
+          {Right}
+        </CollapsibleTrigger>
+      )}
 
       {!collapsed && (
         <CollapsibleContent>
@@ -112,7 +128,7 @@ export function NestedSidebarItem({
                   <SI className="w-5 h-5 flex-shrink-0" />
                   <span className="flex-1 text-sm font-medium truncate">{sLabel}</span>
                 </div>
-                <ChevronRight className="w-4 h-4 flex-shrink-0" />
+                {null}
               </NavLink>
             ))}
           </div>
