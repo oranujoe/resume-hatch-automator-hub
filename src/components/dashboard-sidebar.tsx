@@ -57,15 +57,16 @@ export const SidebarItem = ({
     <NavLink 
       to={href} 
       className={({ isActive }) => cn(
-        "flex items-center gap-3 rounded-lg px-3 py-2.5 transition-all hover:bg-accent/50",
-        isActive ? "text-primary font-medium bg-accent/50" : "text-muted-foreground",
+        "flex items-center gap-3 px-4 py-2 rounded-lg transition-colors",
+        "hover:bg-muted",
+        isActive ? "bg-yellow-200 text-blue-600 rounded-full font-medium" : "text-muted-foreground",
         collapsed && "justify-center"
       )}
     >
       <div className="flex items-center justify-center w-5 h-5">
         <Icon size={20} />
       </div>
-      {!collapsed && <span>{label}</span>}
+      {!collapsed && <span className="text-sm font-medium">{label}</span>}
     </NavLink>
   );
 };
@@ -231,7 +232,7 @@ export function DashboardSidebar({ className }: SidebarProps) {
 
   return (
     <div className={cn(
-      "flex-shrink-0 h-screen sticky top-0 border-r overflow-y-auto",
+      "flex-shrink-0 h-screen sticky top-0 border-r overflow-y-auto bg-white",
       collapsed ? "w-[72px]" : "w-[260px]",
       className
     )}>

@@ -37,8 +37,9 @@ export function NestedSidebarItem({
         to={href || "#"}
         className={({ isActive }) =>
           cn(
-            "flex items-center gap-3 rounded-lg px-3 py-2.5 transition-all hover:bg-accent/50",
-            isActive ? "text-primary font-medium bg-accent/50" : "text-muted-foreground",
+            "flex items-center gap-3 px-4 py-2 rounded-lg transition-colors",
+            "hover:bg-muted",
+            isActive ? "bg-yellow-200 text-blue-600 rounded-full font-medium" : "text-muted-foreground",
             collapsed && "justify-center"
           )
         }
@@ -46,7 +47,7 @@ export function NestedSidebarItem({
         <div className="flex items-center justify-center w-5 h-5">
           <Icon size={20} />
         </div>
-        {!collapsed && <span>{label}</span>}
+        {!collapsed && <span className="text-sm font-medium">{label}</span>}
       </NavLink>
     );
   }
@@ -61,8 +62,9 @@ export function NestedSidebarItem({
       >
         <CollapsibleTrigger
           className={cn(
-            "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 transition-all hover:bg-accent/50",
-            isOpen ? "text-primary font-medium" : "text-muted-foreground",
+            "flex w-full items-center gap-3 px-4 py-2 rounded-lg transition-colors",
+            "hover:bg-muted",
+            isOpen ? "text-blue-600 font-medium" : "text-muted-foreground",
             collapsed && "justify-center"
           )}
         >
@@ -71,7 +73,7 @@ export function NestedSidebarItem({
           </div>
           {!collapsed && (
             <>
-              <span className="flex-1">{label}</span>
+              <span className="text-sm font-medium flex-1">{label}</span>
               {isOpen ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
             </>
           )}
@@ -85,15 +87,16 @@ export function NestedSidebarItem({
                 to={item.href}
                 className={({ isActive }) =>
                   cn(
-                    "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent/50",
-                    isActive ? "text-primary font-medium bg-accent/50" : "text-muted-foreground"
+                    "flex items-center gap-3 px-4 py-2 rounded-lg transition-colors",
+                    "hover:bg-muted",
+                    isActive ? "bg-yellow-200 text-blue-600 rounded-full font-medium" : "text-muted-foreground"
                   )
                 }
               >
-                <div className="flex items-center justify-center w-4 h-4">
+                <div className="flex items-center justify-center w-5 h-5">
                   <item.icon size={16} />
                 </div>
-                <span>{item.label}</span>
+                <span className="text-sm font-medium">{item.label}</span>
               </NavLink>
             ))}
           </div>
