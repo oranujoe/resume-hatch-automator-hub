@@ -16,7 +16,6 @@ interface NestedSidebarItemProps {
   collapsed?: boolean;
 }
 
-// Make sure to export the component correctly
 export function NestedSidebarItem({
   icon: Icon,
   label,
@@ -26,12 +25,17 @@ export function NestedSidebarItem({
 }: NestedSidebarItemProps) {
   const [isOpen, setIsOpen] = useState(false);
 
-  // Shared classes - standardized gap for consistent spacing
+  // Shared classes for consistent layout
   const base = "flex items-center transition-colors hover:bg-muted dark:hover:bg-slate-800";
-  // Use a consistent gap-3 (0.75rem) for all items
   const padding = collapsed ? "px-0 py-2 justify-center" : "gap-3 px-4 py-2 rounded-lg";
-  const active = "bg-yellow-200 text-blue-600 rounded-full font-medium dark:bg-blue-900 dark:text-yellow-200";
+  
+  // Modification: Use text color change without changing the container styling for active state
+  // This prevents layout shifts between active and inactive items
+  const active = "text-blue-600 font-medium dark:text-yellow-200";
   const inactive = "text-muted-foreground dark:text-white";
+  
+  // Separate background styling for active items that won't affect layout
+  const activeBg = "bg-yellow-200 dark:bg-blue-900";
 
   // No sub-items → simple NavLink
   if (!subItems?.length) {
@@ -39,13 +43,31 @@ export function NestedSidebarItem({
       <NavLink
         to={href || "#"}
         className={({ isActive }) =>
-          cn(base, padding, isActive ? active : inactive)
+          cn(
+            base, 
+            padding,
+            // Apply consistent container styling regardless of active state
+            "relative", // Add relative positioning for the pseudo-element
+            isActive ? active : inactive
+          )
         }
       >
-        <div className="flex items-center justify-center w-5 h-5">
-          <Icon size={20} className="flex-shrink-0" />
-        </div>
-        {!collapsed && <span className="text-sm font-medium">{label}</span>}
+        {({ isActive }) => (
+          <>
+            {/* Background layer that doesn't affect layout */}
+            {isActive && (
+              <div className={`absolute inset-0 ${activeBg} rounded-lg -z-10`}></div>
+            )}
+            
+            {/* Icon with consistent spacing */}
+            <div className="flex items-center justify-center w-5 h-5">
+              <Icon size={20} className="flex-shrink-0" />
+            </div>
+            
+            {/* Label with consistent spacing */}
+            {!collapsed && <span className="text-sm font-medium">{label}</span>}
+          </>
+        )}
       </NavLink>
     );
   }
@@ -79,13 +101,26 @@ export function NestedSidebarItem({
               key={subHref}
               to={subHref}
               className={({ isActive }) =>
-                cn(base, "gap-3 px-4 py-2 rounded-lg pl-2", isActive ? active : inactive)
+                cn(
+                  base, 
+                  "gap-3 px-4 py-2 rounded-lg pl-2 relative",
+                  isActive ? active : inactive
+                )
               }
             >
-              <div className="flex items-center justify-center w-5 h-5">
-                <SubIcon size={20} className="flex-shrink-0" />
-              </div>
-              <span className="text-sm font-medium">{subLabel}</span>
+              {({ isActive }) => (
+                <>
+                  {/* Background layer that doesn't affect layout */}
+                  {isActive && (
+                    <div className={`absolute inset-0 ${activeBg} rounded-lg -z-10`}></div>
+                  )}
+                  
+                  <div className="flex items-center justify-center w-5 h-5">
+                    <SubIcon size={20} className="flex-shrink-0" />
+                  </div>
+                  <span className="text-sm font-medium">{subLabel}</span>
+                </>
+              )}
             </NavLink>
           ))}
         </div>
@@ -93,6 +128,3 @@ export function NestedSidebarItem({
     </Collapsible>
   );
 }
-
-// Add a default export as well to ensure compatibility
-export default NestedSidebarItem;
