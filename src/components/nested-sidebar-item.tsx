@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { NavLink, useLocation, Link } from "react-router-dom";
+import { NavLink, useLocation } from "react-router-dom";
 import { ChevronDown, ChevronRight, LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -28,7 +28,7 @@ export function NestedSidebarItem({
   const location = useLocation();
   
   // Check if this item or any of its children are active
-  const isItemActive = href === location.pathname;
+  const isItemActive = href && location.pathname === href;
   const isChildActive = hasSub && subItems!.some(item => item.href === location.pathname);
   
   // Auto-expand when a child is active
@@ -58,13 +58,29 @@ export function NestedSidebarItem({
   );
 
   // 4) Right side chevron
-  const Right = !collapsed && hasSub && (
-    isOpen 
-      ? <ChevronDown className="w-4 h-4 flex-shrink-0" />
-      : <ChevronRight className="w-4 h-4 flex-shrink-0" />
+  const Right = !collapsed && (
+    hasSub
+      ? (isOpen
+          ? <ChevronDown className="w-4 h-4 flex-shrink-0" />
+          : <ChevronRight className="w-4 h-4 flex-shrink-0" />
+        )
+      : null
   );
 
-  // === Leaf (Item without children) ===
+  // Handle click on parent items with children
+  const handleParentClick = (e: React.MouseEvent) => {
+    if (hasSub) {
+      // Toggle dropdown state
+      setIsOpen(!isOpen);
+      
+      // If there's also a valid href, let the navigation happen naturally
+      if (!href || href === "#") {
+        e.preventDefault();
+      }
+    }
+  };
+
+  // === Leaf ===
   if (!hasSub) {
     return (
       <NavLink
@@ -75,57 +91,46 @@ export function NestedSidebarItem({
         end
       >
         {Left}
+        {Right}
       </NavLink>
     );
   }
 
-  // === Branch (Item with children) ===
-  // For parent items with children, we need to handle both navigation and dropdown
+  // === Branch ===
   return (
     <Collapsible 
       open={isOpen && !collapsed} 
       onOpenChange={setIsOpen} 
       className="w-full"
     >
-      {/* Parent item that can be clicked */}
-      <div className="flex items-center">
-        {/* Main content/link part */}
+      {href && href !== "#" ? (
         <NavLink
-          to={href || "#"}
-          className={({ isActive }) => 
+          to={href}
+          className={({ isActive }) =>
             cn(
-              "flex-1",
-              base,
-              (isActive || isChildActive) ? active : inactive, 
+              base, 
+              (isActive || isChildActive) ? active : inactive,
               collapsed && "justify-center",
-              "pr-2" // Less right padding to make room for the trigger
+              "flex items-center justify-between w-full"
             )
           }
-          onClick={() => {
-            // If href is # or empty, just toggle open state
-            if (!href || href === "#") {
-              setIsOpen(!isOpen);
-            }
-          }}
-          end
+          onClick={handleParentClick}
         >
           {Left}
+          {Right}
         </NavLink>
-        
-        {/* Separate dropdown trigger */}
-        {!collapsed && (
-          <button 
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              setIsOpen(!isOpen);
-            }}
-            className="p-2 hover:bg-muted rounded-lg"
-          >
-            {isOpen ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
-          </button>
-        )}
-      </div>
+      ) : (
+        <CollapsibleTrigger
+          className={cn(
+            base,
+            (isItemActive || isChildActive) ? active : inactive,
+            collapsed && "justify-center"
+          )}
+        >
+          {Left}
+          {Right}
+        </CollapsibleTrigger>
+      )}
 
       {!collapsed && (
         <CollapsibleContent>
