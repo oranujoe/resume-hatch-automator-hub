@@ -1,5 +1,4 @@
-
-import React, { useState } from "react";
+import { useState, useEffect } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import { ChevronDown, ChevronRight, LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -29,9 +28,16 @@ export function NestedSidebarItem({
   const location = useLocation();
   
   // Check if this item or any of its children are active
-  const isItemActive = href === location.pathname;
+  const isItemActive = href && location.pathname === href;
   const isChildActive = hasSub && subItems!.some(item => item.href === location.pathname);
   
+  // Auto-expand when a child is active
+  useEffect(() => {
+    if (isChildActive && !isOpen) {
+      setIsOpen(true);
+    }
+  }, [isChildActive, isOpen]);
+
   // 1) Base layout for every row
   const base = cn(
     "flex items-center justify-between w-full",
@@ -40,7 +46,7 @@ export function NestedSidebarItem({
   );
 
   // 2) Color toggles
-  const active   = "bg-yellow-200 text-blue-600 font-medium dark:bg-blue-900 dark:text-yellow-200";
+  const active = "bg-yellow-200 text-blue-600 font-medium dark:bg-blue-900 dark:text-yellow-200";
   const inactive = "text-muted-foreground dark:text-white";
 
   // 3) Left side icon+label
@@ -58,8 +64,21 @@ export function NestedSidebarItem({
           ? <ChevronDown className="w-4 h-4 flex-shrink-0" />
           : <ChevronRight className="w-4 h-4 flex-shrink-0" />
         )
-      : <ChevronRight className="w-4 h-4 flex-shrink-0" />
+      : null
   );
+
+  // Handle click on parent items with children
+  const handleParentClick = (e: React.MouseEvent) => {
+    if (hasSub) {
+      // Toggle dropdown state
+      setIsOpen(!isOpen);
+      
+      // If there's also a valid href, let the navigation happen naturally
+      if (!href || href === "#") {
+        e.preventDefault();
+      }
+    }
+  };
 
   // === Leaf ===
   if (!hasSub) {
@@ -78,24 +97,40 @@ export function NestedSidebarItem({
   }
 
   // === Branch ===
-  // For parent items, we manually control the active state
   return (
     <Collapsible 
       open={isOpen && !collapsed} 
       onOpenChange={setIsOpen} 
       className="w-full"
     >
-      <CollapsibleTrigger
-        className={cn(
-          base,
-          // Apply active styles if either this item or any of its children are active
-          (isItemActive || isChildActive) ? active : inactive,
-          collapsed && "justify-center"
-        )}
-      >
-        {Left}
-        {Right}
-      </CollapsibleTrigger>
+      {href && href !== "#" ? (
+        <NavLink
+          to={href}
+          className={({ isActive }) =>
+            cn(
+              base, 
+              (isActive || isChildActive) ? active : inactive,
+              collapsed && "justify-center",
+              "flex items-center justify-between w-full"
+            )
+          }
+          onClick={handleParentClick}
+        >
+          {Left}
+          {Right}
+        </NavLink>
+      ) : (
+        <CollapsibleTrigger
+          className={cn(
+            base,
+            (isItemActive || isChildActive) ? active : inactive,
+            collapsed && "justify-center"
+          )}
+        >
+          {Left}
+          {Right}
+        </CollapsibleTrigger>
+      )}
 
       {!collapsed && (
         <CollapsibleContent>
@@ -113,7 +148,6 @@ export function NestedSidebarItem({
                   <SI className="w-5 h-5 flex-shrink-0" />
                   <span className="flex-1 text-sm font-medium truncate">{sLabel}</span>
                 </div>
-                <ChevronRight className="w-4 h-4 flex-shrink-0" />
               </NavLink>
             ))}
           </div>
