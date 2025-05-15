@@ -88,7 +88,7 @@ export function NestedSidebarItem({
       <CollapsibleTrigger
         className={cn(
           base,
-          // Show active if either the item itself is active OR if one of its children is active
+          // Apply active styles if either this item or any of its children are active
           (isItemActive || isChildActive) ? active : inactive,
           collapsed && "justify-center"
         )}
