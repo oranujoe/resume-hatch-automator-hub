@@ -26,29 +26,30 @@ export function NestedSidebarItem({
   const [isOpen, setIsOpen] = useState(false);
   const hasSub = Array.isArray(subItems) && subItems.length > 0;
   const location = useLocation();
-
+  
+  // Check if this item or any of its children are active based on exact path matching
   const isItemActive = href === location.pathname;
   const isChildActive = hasSub && subItems!.some(item => item.href === location.pathname);
-  const isActive = isItemActive || isChildActive;
-
+  
+  // Auto-expand when a child is active
   useEffect(() => {
     if (isChildActive && !isOpen) {
       setIsOpen(true);
     }
   }, [isChildActive, isOpen]);
 
+  // 1) Base layout for every row
   const base = cn(
     "flex items-center justify-between w-full",
     "px-4 py-2 rounded-lg transition-colors",
     "hover:bg-muted dark:hover:bg-slate-800"
   );
 
+  // 2) Color toggles
   const active = "bg-yellow-200 text-blue-600 font-medium dark:bg-blue-900 dark:text-yellow-200";
   const inactive = "text-muted-foreground dark:text-white";
 
-  const getLinkClass = (isActive: boolean, extra?: string) =>
-    cn(base, isActive ? active : inactive, collapsed && "justify-center", extra);
-
+  // 3) Left side icon+label
   const Left = (
     <div className="flex items-center gap-3">
       <Icon className="w-5 h-5 flex-shrink-0" />
@@ -56,43 +57,66 @@ export function NestedSidebarItem({
     </div>
   );
 
+  // 4) Right side chevron for expandable items
   const Right = !collapsed && hasSub && (
-    isOpen
+    isOpen 
       ? <ChevronDown className="w-4 h-4 flex-shrink-0" />
       : <ChevronRight className="w-4 h-4 flex-shrink-0" />
   );
 
+  // === Leaf (Item without children) ===
   if (!hasSub) {
     return (
       <NavLink
         to={href || "#"}
-        className={({ isActive }) => getLinkClass(isActive)}
+        className={({ isActive }) =>
+          cn(base, isActive ? active : inactive, collapsed && "justify-center")
+        }
       >
         {Left}
       </NavLink>
     );
   }
 
+  // === Branch (Item with children) ===
   return (
-    <Collapsible open={isOpen && !collapsed} onOpenChange={setIsOpen} className="w-full">
+    <Collapsible 
+      open={isOpen && !collapsed} 
+      onOpenChange={setIsOpen} 
+      className="w-full"
+    >
       <div className="flex items-center">
+        {/* Use NavLink for navigation but with explicit isActive checking */}
         <NavLink
           to={href || "#"}
-          className={getLinkClass(isActive, hasSub ? "flex-1 pr-2" : undefined)}
+          className={({ isActive: routerIsActive }) => 
+            cn(
+              "flex-1",
+              base,
+              // Only active if exact path match
+              (href && href !== "#" && routerIsActive) ? active : inactive,
+              collapsed && "justify-center",
+              hasSub && "pr-2" // Less right padding to make room for the dropdown trigger
+            )
+          }
         >
           {Left}
         </NavLink>
-
+        
+        {/* Separate dropdown trigger */}
         {!collapsed && hasSub && (
-          <button
+          <button 
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
               setIsOpen(!isOpen);
             }}
-            className={cn("p-2 rounded-lg", "hover:bg-muted dark:hover:bg-slate-800")}
+            className={cn(
+              "p-2 rounded-lg",
+              "hover:bg-muted dark:hover:bg-slate-800"
+            )}
           >
-            {Right}
+            {isOpen ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
           </button>
         )}
       </div>
@@ -104,7 +128,9 @@ export function NestedSidebarItem({
               <NavLink
                 key={sHref}
                 to={sHref}
-                className={({ isActive }) => getLinkClass(isActive, "pl-2")}
+                className={({ isActive }) =>
+                  cn(base, isActive ? active : inactive, "pl-2")
+                }
               >
                 <div className="flex items-center gap-3">
                   <SI className="w-5 h-5 flex-shrink-0" />
