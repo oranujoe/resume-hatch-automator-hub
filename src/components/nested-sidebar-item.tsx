@@ -30,10 +30,9 @@ export function NestedSidebarItem({
   const location = useLocation();
   const hasSub = Array.isArray(subItems) && subItems.length > 0;
 
-  // Only leaf and child routes count as active
+  // Only leaf routes count as active; parent never highlights on child click
   const isItemRouteActive = !hasSub && href === location.pathname;
-  const isChildRouteActive = hasSub && subItems!.some(si => si.href === location.pathname);
-  const isActive = isItemRouteActive || isChildRouteActive;
+  const isActive = isItemRouteActive;
 
   // Shared styles
   const base =
@@ -64,7 +63,7 @@ export function NestedSidebarItem({
       <CollapsibleTrigger asChild>
         <button
           type="button"
-          className={cn(base, isActive ? activeClasses : inactiveClasses, collapsed && "justify-center")}
+          className={cn(base, inactiveClasses, collapsed && "justify-center")}
         >
           <div className="flex items-center gap-3">
             <Icon className="w-5 h-5 flex-shrink-0" />
