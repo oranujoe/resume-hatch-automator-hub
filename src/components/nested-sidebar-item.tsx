@@ -30,14 +30,16 @@ export function NestedSidebarItem({
   const location = useLocation();
   const hasSub = Array.isArray(subItems) && subItems.length > 0;
 
-  // Active only when a leaf or a child route matches
+  // Only leaf and child routes count as active
   const isItemRouteActive = !hasSub && href === location.pathname;
   const isChildRouteActive = hasSub && subItems!.some(si => si.href === location.pathname);
   const isActive = isItemRouteActive || isChildRouteActive;
 
   // Shared styles
-  const base = "flex items-center justify-between w-full px-4 py-2 rounded-lg transition-colors hover:bg-muted dark:hover:bg-slate-800 cursor-pointer";
-  const activeClasses = "bg-yellow-200 text-blue-600 font-medium dark:bg-blue-900 dark:text-yellow-200";
+  const base =
+    "flex items-center justify-between w-full px-4 py-2 rounded-lg transition-colors hover:bg-muted dark:hover:bg-slate-800 cursor-pointer";
+  const activeClasses =
+    "bg-yellow-200 text-blue-600 font-medium dark:bg-blue-900 dark:text-yellow-200";
   const inactiveClasses = "text-muted-foreground dark:text-white";
 
   // === Leaf (no children) ===
@@ -60,16 +62,21 @@ export function NestedSidebarItem({
   return (
     <Collapsible open={open && !collapsed} onOpenChange={onToggle} className="w-full">
       <CollapsibleTrigger asChild>
-        <div
-          onClick={onToggle}
+        <button
+          type="button"
           className={cn(base, isActive ? activeClasses : inactiveClasses, collapsed && "justify-center")}
         >
           <div className="flex items-center gap-3">
             <Icon className="w-5 h-5 flex-shrink-0" />
             {!collapsed && <span className="flex-1 text-sm font-medium truncate">{label}</span>}
           </div>
-          {!collapsed && (open ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />)}
-        </div>
+          {!collapsed &&
+            (open ? (
+              <ChevronDown className="w-4 h-4 flex-shrink-0" />
+            ) : (
+              <ChevronRight className="w-4 h-4 flex-shrink-0" />
+            ))}
+        </button>
       </CollapsibleTrigger>
 
       {!collapsed && (
