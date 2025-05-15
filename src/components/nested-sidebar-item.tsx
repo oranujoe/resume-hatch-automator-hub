@@ -27,8 +27,8 @@ export function NestedSidebarItem({
   const hasSub = Array.isArray(subItems) && subItems.length > 0;
   const location = useLocation();
   
-  // Check if this item or any of its children are active
-  const isItemActive = href && location.pathname === href;
+  // Check if this item or any of its children are active based on exact path matching
+  const isItemActive = href === location.pathname;
   const isChildActive = hasSub && subItems!.some(item => item.href === location.pathname);
   
   // Auto-expand when a child is active
@@ -57,30 +57,14 @@ export function NestedSidebarItem({
     </div>
   );
 
-  // 4) Right side chevron
-  const Right = !collapsed && (
-    hasSub
-      ? (isOpen
-          ? <ChevronDown className="w-4 h-4 flex-shrink-0" />
-          : <ChevronRight className="w-4 h-4 flex-shrink-0" />
-        )
-      : null
+  // 4) Right side chevron for expandable items
+  const Right = !collapsed && hasSub && (
+    isOpen 
+      ? <ChevronDown className="w-4 h-4 flex-shrink-0" />
+      : <ChevronRight className="w-4 h-4 flex-shrink-0" />
   );
 
-  // Handle click on parent items with children
-  const handleParentClick = (e: React.MouseEvent) => {
-    if (hasSub) {
-      // Toggle dropdown state
-      setIsOpen(!isOpen);
-      
-      // If there's also a valid href, let the navigation happen naturally
-      if (!href || href === "#") {
-        e.preventDefault();
-      }
-    }
-  };
-
-  // === Leaf ===
+  // === Leaf (Item without children) ===
   if (!hasSub) {
     return (
       <NavLink
@@ -88,49 +72,54 @@ export function NestedSidebarItem({
         className={({ isActive }) =>
           cn(base, isActive ? active : inactive, collapsed && "justify-center")
         }
-        end
       >
         {Left}
-        {Right}
       </NavLink>
     );
   }
 
-  // === Branch ===
+  // === Branch (Item with children) ===
   return (
     <Collapsible 
       open={isOpen && !collapsed} 
       onOpenChange={setIsOpen} 
       className="w-full"
     >
-      {href && href !== "#" ? (
+      <div className="flex items-center">
+        {/* Use NavLink for navigation but with explicit isActive checking */}
         <NavLink
-          to={href}
-          className={({ isActive }) =>
+          to={href || "#"}
+          className={({ isActive: routerIsActive }) => 
             cn(
-              base, 
-              (isActive || isChildActive) ? active : inactive,
+              "flex-1",
+              base,
+              // Only active if exact path match
+              (href && href !== "#" && routerIsActive) ? active : inactive,
               collapsed && "justify-center",
-              "flex items-center justify-between w-full"
+              hasSub && "pr-2" // Less right padding to make room for the dropdown trigger
             )
           }
-          onClick={handleParentClick}
         >
           {Left}
-          {Right}
         </NavLink>
-      ) : (
-        <CollapsibleTrigger
-          className={cn(
-            base,
-            (isItemActive || isChildActive) ? active : inactive,
-            collapsed && "justify-center"
-          )}
-        >
-          {Left}
-          {Right}
-        </CollapsibleTrigger>
-      )}
+        
+        {/* Separate dropdown trigger */}
+        {!collapsed && hasSub && (
+          <button 
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setIsOpen(!isOpen);
+            }}
+            className={cn(
+              "p-2 rounded-lg",
+              "hover:bg-muted dark:hover:bg-slate-800"
+            )}
+          >
+            {isOpen ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+          </button>
+        )}
+      </div>
 
       {!collapsed && (
         <CollapsibleContent>
@@ -142,7 +131,6 @@ export function NestedSidebarItem({
                 className={({ isActive }) =>
                   cn(base, isActive ? active : inactive, "pl-2")
                 }
-                end
               >
                 <div className="flex items-center gap-3">
                   <SI className="w-5 h-5 flex-shrink-0" />
