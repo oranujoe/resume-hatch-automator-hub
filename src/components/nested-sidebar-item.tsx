@@ -19,7 +19,6 @@ export interface NestedSidebarItemProps {
 }
 
 export function NestedSidebarItem({
-  id,
   icon: Icon,
   label,
   href,
@@ -31,68 +30,46 @@ export function NestedSidebarItem({
   const location = useLocation();
   const hasSub = Array.isArray(subItems) && subItems.length > 0;
 
-  // Determine active state
-  const isItemRouteActive = href === location.pathname;
+  // Active only when a leaf or a child route matches
+  const isItemRouteActive = !hasSub && href === location.pathname;
   const isChildRouteActive = hasSub && subItems!.some(si => si.href === location.pathname);
-  const isActive = open || isItemRouteActive || isChildRouteActive;
+  const isActive = isItemRouteActive || isChildRouteActive;
 
-  // Base styling
-  const baseClasses =
-    "flex items-center justify-between w-full px-4 py-2 rounded-lg transition-colors hover:bg-muted dark:hover:bg-slate-800 cursor-pointer";
-  const activeClasses =
-    "bg-yellow-200 text-blue-600 font-medium dark:bg-blue-900 dark:text-yellow-200";
+  // Shared styles
+  const base = "flex items-center justify-between w-full px-4 py-2 rounded-lg transition-colors hover:bg-muted dark:hover:bg-slate-800 cursor-pointer";
+  const activeClasses = "bg-yellow-200 text-blue-600 font-medium dark:bg-blue-900 dark:text-yellow-200";
   const inactiveClasses = "text-muted-foreground dark:text-white";
 
-  // Leaf item
+  // === Leaf (no children) ===
   if (!hasSub) {
     return (
       <NavLink
         to={href!}
         end
         className={({ isActive: routeActive }) =>
-          cn(baseClasses, routeActive ? activeClasses : inactiveClasses, collapsed && "justify-center")
+          cn(base, routeActive ? activeClasses : inactiveClasses, collapsed && "justify-center")
         }
       >
         <Icon className="w-5 h-5 flex-shrink-0" />
-        {!collapsed && (
-          <span className="flex-1 ml-3 text-sm font-medium truncate">{label}</span>
-        )}
+        {!collapsed && <span className="flex-1 ml-3 text-sm font-medium truncate">{label}</span>}
       </NavLink>
     );
   }
 
-  // Branch item with children
-  const Trigger: any = href ? NavLink : "div";
-  const triggerProps = href ? { to: href, end: true } : {};
-
+  // === Branch (has children) ===
   return (
-    <Collapsible
-      open={open && !collapsed}
-      onOpenChange={onToggle}
-      className="w-full"
-    >
+    <Collapsible open={open && !collapsed} onOpenChange={onToggle} className="w-full">
       <CollapsibleTrigger asChild>
-        <Trigger
-          {...triggerProps}
+        <div
           onClick={onToggle}
-          className={cn(baseClasses, isActive ? activeClasses : inactiveClasses, collapsed && "justify-center")}
+          className={cn(base, isActive ? activeClasses : inactiveClasses, collapsed && "justify-center")}
         >
-          {/* Icon + Label */}
           <div className="flex items-center gap-3">
             <Icon className="w-5 h-5 flex-shrink-0" />
-            {!collapsed && (
-              <span className="flex-1 text-sm font-medium truncate">{label}</span>
-            )}
+            {!collapsed && <span className="flex-1 text-sm font-medium truncate">{label}</span>}
           </div>
-
-          {/* Chevron */}
-          {!collapsed &&
-            (open ? (
-              <ChevronDown className="w-4 h-4 flex-shrink-0" />
-            ) : (
-              <ChevronRight className="w-4 h-4 flex-shrink-0" />
-            ))}
-        </Trigger>
+          {!collapsed && (open ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />)}
+        </div>
       </CollapsibleTrigger>
 
       {!collapsed && (
@@ -104,13 +81,11 @@ export function NestedSidebarItem({
                 to={sHref}
                 end
                 className={({ isActive: childActive }) =>
-                  cn(baseClasses, childActive ? activeClasses : inactiveClasses, "pl-2")
+                  cn(base, childActive ? activeClasses : inactiveClasses, "pl-2")
                 }
               >
                 <SI className="w-5 h-5 flex-shrink-0" />
-                <span className="flex-1 ml-3 text-sm font-medium truncate">
-                  {sLabel}
-                </span>
+                <span className="flex-1 ml-3 text-sm font-medium truncate">{sLabel}</span>
               </NavLink>
             ))}
           </div>
