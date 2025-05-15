@@ -37,7 +37,7 @@ export function NestedSidebarItem({
   const isActive = open || isItemRouteActive || isChildRouteActive;
 
   // Base styling
-  const baseClasses = "flex items-center justify-between w-full px-4 py-2 rounded-lg transition-colors hover:bg-muted dark:hover:bg-slate-800";
+  const baseClasses = "flex items-center justify-between w-full px-4 py-2 rounded-lg transition-colors hover:bg-muted dark:hover:bg-slate-800 cursor-pointer";
   const activeClasses = "bg-yellow-200 text-blue-600 font-medium dark:bg-blue-900 dark:text-yellow-200";
   const inactiveClasses = "text-muted-foreground dark:text-white";
 
