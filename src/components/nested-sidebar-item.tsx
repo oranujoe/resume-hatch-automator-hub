@@ -1,5 +1,6 @@
-
-t { ChevronDown, ChevronRight, LucideIcon } from "lucide-react";
+import { useState } from "react";
+import { NavLink, useLocation } from "react-router-dom";
+import { ChevronDown, ChevronRight, LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   Collapsible,
@@ -86,7 +87,8 @@ export function NestedSidebarItem({
       <CollapsibleTrigger
         className={cn(
           base,
-          isChildActive && !isItemActive ? inactive : (isItemActive ? active : inactive),
+          // Show active if either the item itself is active OR if one of its children is active
+          (isItemActive || isChildActive) ? active : inactive,
           collapsed && "justify-center"
         )}
       >
